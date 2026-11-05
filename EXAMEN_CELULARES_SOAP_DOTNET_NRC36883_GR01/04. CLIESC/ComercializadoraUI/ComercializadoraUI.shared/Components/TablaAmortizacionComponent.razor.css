@@ -1,0 +1,133 @@
+﻿.tabla-card {
+    border-radius: 16px;
+    overflow: hidden;
+    border-top: 4px solid #10b981;
+}
+
+.tabla-header {
+    background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+    color: white;
+    border: none;
+    padding: 1.1rem 1.5rem;
+}
+
+.header-icon-sm {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,.15);
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-right: .9rem;
+    backdrop-filter: blur(6px);
+    flex-shrink: 0;
+}
+
+.credito-badge {
+    background: rgba(255,255,255,.2);
+    color: white;
+    font-weight: 600;
+    padding: .45rem .9rem;
+    border-radius: 999px;
+    font-size: .9rem;
+    backdrop-filter: blur(6px);
+    display: inline-flex;
+    align-items: center;
+    gap: .15rem;
+}
+
+/* Tabla Desktop */
+.tabla-amortizacion thead th {
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: 600;
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 1rem .75rem;
+}
+
+.tabla-amortizacion tbody tr {
+    transition: background .15s;
+}
+
+    .tabla-amortizacion tbody tr:hover {
+        background: #f8fafc;
+    }
+
+.tabla-amortizacion tbody td {
+    padding: .9rem .75rem;
+    border-color: #f1f5f9;
+}
+
+/* Badge de número de cuota */
+.cuota-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 .4rem;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+    color: #1e40af;
+    font-weight: 700;
+    font-size: .85rem;
+    border: 1px solid #bfdbfe;
+}
+
+/* Footer de totales */
+.tabla-amortizacion tfoot tr {
+    background: #f8fafc;
+    border-top: 2px solid #e2e8f0;
+}
+
+.tabla-amortizacion tfoot td {
+    padding: 1rem .75rem;
+    font-size: .95rem;
+}
+
+/* ==========================================
+   OPTIMIZACIONES MÓVILES PARA LA TABLA
+   ========================================== */
+@media (max-width: 767.98px) {
+    .tabla-header {
+        padding: 0.85rem 1rem;
+    }
+
+    .header-icon-sm {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+        margin-right: 0.65rem;
+    }
+
+    .credito-badge {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.75rem;
+    }
+
+    /* Caja de totales en móvil */
+    .mobile-totals-box {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        border-radius: 12px;
+    }
+
+    /* Tarjetas de cuota individual */
+    .cuota-mobile-card {
+        border-radius: 12px;
+        background: #ffffff;
+        border-color: #e2e8f0 !important;
+    }
+
+    .micro-text {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        font-weight: 600;
+    }
+}

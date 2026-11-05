@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="../../04. CLIMOV/EurekabankUI.Maui/EurekabankUI.Maui.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="../../04. CLIWEB/EurekabankUI.Web/EurekabankUI.Web/EurekabankUI.Web.csproj" />
+  <Project Path="EurekabankUI.Shared/EurekabankUI.Shared.csproj" />
+</Solution>

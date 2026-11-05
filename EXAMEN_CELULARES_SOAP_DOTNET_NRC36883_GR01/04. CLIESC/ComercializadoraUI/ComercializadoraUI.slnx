@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="../../04. CLIMOV/ComercializadoraUI.maui/ComercializadoraUI.maui.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="../../04. CLIWEB/ComercializadoraUI.web/ComercializadoraUI.web.csproj" />
+  <Project Path="ComercializadoraUI.shared/ComercializadoraUI.shared.csproj" />
+</Solution>

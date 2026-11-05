@@ -1,0 +1,254 @@
+﻿.ventas-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.25rem 0.75rem;
+}
+
+.ventas-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    color: white;
+    padding: 1.25rem 1.25rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(30, 58, 138, .25);
+}
+
+.header-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255,255,255,.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-right: 0.85rem;
+    backdrop-filter: blur(6px);
+    flex-shrink: 0;
+}
+
+.header-title {
+    font-size: 1.4rem;
+}
+
+.card-form, .card-success, .placeholder-card {
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.card-form {
+    border-top: 4px solid #3b82f6;
+}
+
+.card-header-custom {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.85rem 1.15rem;
+}
+
+.card-header-success {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    color: white;
+    border: none;
+    padding: 0.85rem 1.15rem;
+}
+
+.card-success {
+    border-top: 4px solid #10b981;
+}
+
+/* Steps */
+.form-step {
+    position: relative;
+}
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    margin-bottom: .5rem;
+}
+
+.step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: white;
+    font-weight: 700;
+    font-size: .75rem;
+    margin-right: .4rem;
+}
+
+.step-label {
+    font-weight: 600;
+    color: #334155;
+    font-size: .9rem;
+}
+
+/* Controls */
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    transition: all .2s;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, .12);
+    }
+
+.input-group-text {
+    border-radius: 10px 0 0 10px;
+    border: 1.5px solid #e2e8f0;
+    border-right: none;
+    color: #64748b;
+}
+
+.input-group .form-control {
+    border-radius: 0 10px 10px 0;
+}
+
+/* Payment option cards */
+.payment-option {
+    display: block;
+    padding: 0.85rem 0.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    background: white;
+    height: 100%;
+}
+
+    .payment-option:hover {
+        border-color: #3b82f6;
+    }
+
+    .payment-option.selected {
+        border-color: #3b82f6;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, .15);
+    }
+
+.option-title {
+    font-size: 0.95rem;
+}
+
+.option-subtitle {
+    font-size: 0.75rem;
+}
+
+/* Product preview */
+.product-preview {
+    background: #f1f5f9;
+    padding: .5rem .8rem;
+    border-radius: 8px;
+    font-size: .85rem;
+    color: #334155;
+}
+
+/* Summary box */
+.summary-box {
+    padding: 0.85rem 1.1rem;
+    border-radius: 12px;
+    border: 2px solid transparent;
+}
+
+.summary-success {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+
+/* Submit button */
+.btn-submit {
+    border-radius: 12px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    border: none;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, .35);
+    transition: all .2s;
+}
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, .45);
+    }
+
+    .btn-submit:disabled {
+        opacity: .75;
+    }
+
+/* Result rows */
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .75rem 0;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+    .result-row:last-child {
+        border-bottom: none;
+    }
+
+.result-label {
+    color: #64748b;
+    font-weight: 500;
+    font-size: .9rem;
+}
+
+.placeholder-card {
+    background: repeating-linear-gradient( 45deg, #f8fafc, #f8fafc 10px, #f1f5f9 10px, #f1f5f9 20px );
+    min-height: 200px;
+}
+
+/* ==========================================
+   OPTIMIZACIONES ESPECÍFICAS PARA MÓVIL
+   ========================================== */
+@media (max-width: 767.98px) {
+    .ventas-wrapper {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .ventas-header {
+        padding: 1rem;
+        border-radius: 14px;
+    }
+
+    .header-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .header-title {
+        font-size: 1.2rem;
+    }
+
+    /* Previene auto-zoom del navegador táctil en inputs */
+    .form-control, .form-select, .input-group-text {
+        font-size: 16px !important;
+    }
+
+    .payment-option {
+        padding: 0.75rem 0.25rem;
+    }
+
+    .option-title {
+        font-size: 0.9rem;
+    }
+
+    .option-subtitle {
+        font-size: 0.7rem;
+    }
+
+    .btn-submit {
+        padding: 0.85rem 1rem !important;
+        font-size: 1rem;
+    }
+}

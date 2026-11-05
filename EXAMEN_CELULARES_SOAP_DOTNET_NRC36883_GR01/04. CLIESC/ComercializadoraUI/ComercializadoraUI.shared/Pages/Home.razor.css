@@ -1,0 +1,495 @@
+﻿/* ===================== Home - Safe Area (MAUI) ===================== */
+.home-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    /* 🔒 Safe area para MAUI: notch, barra de estado y gestos */
+    padding-top: calc(1.5rem + env(safe-area-inset-top));
+    padding-bottom: calc(3rem + env(safe-area-inset-bottom));
+    padding-left: calc(1rem + env(safe-area-inset-left));
+    padding-right: calc(1rem + env(safe-area-inset-right));
+}
+
+/* ===================== HERO ===================== */
+.hero-section {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #3b82f6 100%);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    color: white;
+    box-shadow: 0 12px 40px rgba(30, 58, 138, .35);
+    position: relative;
+    overflow: hidden;
+}
+
+    /* Efecto decorativo de fondo */
+    .hero-section::before {
+        content: "";
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59,130,246,.35), transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .hero-section::after {
+        content: "";
+        position: absolute;
+        bottom: -150px;
+        left: -80px;
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(16,185,129,.25), transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .hero-section > * {
+        position: relative;
+        z-index: 1;
+    }
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(59, 130, 246, .25);
+    border: 1px solid rgba(147, 197, 253, .4);
+    color: #bfdbfe;
+    padding: .45rem 1rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 1.2rem;
+    backdrop-filter: blur(6px);
+}
+
+.hero-title {
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    letter-spacing: -.5px;
+}
+
+.hero-title-highlight {
+    background: linear-gradient(135deg, #38bdf8 0%, #22d3ee 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    max-width: 520px;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+    .hero-subtitle strong {
+        color: #93c5fd;
+    }
+
+/* Botones del hero */
+.btn-hero-primary,
+.btn-hero-secondary {
+    border-radius: 12px;
+    font-weight: 600;
+    padding: .75rem 1.6rem;
+    font-size: 1rem;
+    transition: all .2s;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-hero-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #22d3ee 100%);
+    color: white;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, .5);
+}
+
+    .btn-hero-primary:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 26px rgba(59, 130, 246, .65);
+    }
+
+.btn-hero-secondary {
+    background: rgba(255, 255, 255, .08);
+    color: white;
+    border: 1.5px solid rgba(255, 255, 255, .25);
+    backdrop-filter: blur(6px);
+}
+
+    .btn-hero-secondary:hover {
+        background: rgba(255, 255, 255, .15);
+        color: white;
+        border-color: rgba(255, 255, 255, .4);
+        transform: translateY(-2px);
+    }
+
+/* Stats mini */
+.hero-stats {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.hero-stat {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .6rem 1rem;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+}
+
+    .hero-stat i {
+        font-size: 1.4rem;
+        color: #38bdf8;
+    }
+
+.hero-stat-value {
+    display: block;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: white;
+    line-height: 1;
+}
+
+.hero-stat-label {
+    display: block;
+    font-size: .72rem;
+    color: #cbd5e1;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-top: .2rem;
+}
+
+/* Ilustración */
+.hero-illustration {
+    animation: floatY 5s ease-in-out infinite;
+}
+
+    .hero-illustration svg {
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, .4);
+        max-height: 340px;
+    }
+
+@@keyframes floatY {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* ===================== MÓDULOS ===================== */
+.module-card {
+    display: block;
+    height: 100%;
+    background: white;
+    border-radius: 18px;
+    border-top: 4px solid transparent;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+    transition: all .25s ease;
+    overflow: hidden;
+    color: inherit;
+}
+
+    .module-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 14px 32px rgba(0, 0, 0, .12);
+    }
+
+        .module-card:hover .module-cta {
+            gap: .7rem;
+        }
+
+.module-card-body {
+    padding: 1.75rem 1.5rem 1.5rem;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.module-icon {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.9rem;
+    margin-bottom: 1.1rem;
+    transition: transform .25s;
+}
+
+.module-card:hover .module-icon {
+    transform: scale(1.08) rotate(-4deg);
+}
+
+.icon-primary {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+}
+
+.icon-success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+}
+
+.icon-info {
+    background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+    color: #155e75;
+}
+
+.module-title {
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: .6rem;
+    font-size: 1.15rem;
+}
+
+.module-desc {
+    color: #64748b;
+    font-size: .93rem;
+    line-height: 1.55;
+    margin-bottom: 1.25rem;
+    flex-grow: 1;
+}
+
+.module-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-weight: 600;
+    font-size: .92rem;
+    color: #3b82f6;
+    transition: gap .2s;
+}
+
+/* Colores del CTA por tarjeta */
+.module-card:nth-child(1) .module-cta,
+.col-md-4:nth-child(1) .module-cta {
+    color: #2563eb;
+}
+
+.col-md-4:nth-child(2) .module-cta {
+    color: #059669;
+}
+
+.col-md-4:nth-child(3) .module-cta {
+    color: #0891b2;
+}
+
+/* Borde superior de cada tarjeta según su color */
+.col-md-4:nth-child(1) .module-card {
+    border-top-color: #3b82f6;
+}
+
+.col-md-4:nth-child(2) .module-card {
+    border-top-color: #10b981;
+}
+
+.col-md-4:nth-child(3) .module-card {
+    border-top-color: #06b6d4;
+}
+
+/* ===================== FOOTER INFO ===================== */
+.home-footer-info {
+    padding-top: 1.5rem;
+    border-top: 1px dashed #e2e8f0;
+}
+
+/* ===================== Responsive MAUI / móvil ===================== */
+
+/* Tablets y móviles grandes */
+@media (max-width: 991px) {
+    .home-wrapper {
+        padding-top: calc(1rem + env(safe-area-inset-top));
+        padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+        padding-left: calc(.75rem + env(safe-area-inset-left));
+        padding-right: calc(.75rem + env(safe-area-inset-right));
+    }
+
+    .hero-section {
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+        text-align: center;
+    }
+
+    .hero-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .hero-stats {
+        justify-content: center;
+    }
+
+    .hero-illustration svg {
+        max-height: 260px;
+        margin-top: 1.5rem;
+    }
+}
+
+/* Móviles */
+@media (max-width: 575px) {
+    .home-wrapper {
+        padding-top: calc(.75rem + env(safe-area-inset-top));
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+        padding-left: calc(.6rem + env(safe-area-inset-left));
+        padding-right: calc(.6rem + env(safe-area-inset-right));
+    }
+
+    /* Hero más compacto */
+    .hero-section {
+        padding: 1.5rem 1rem;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(30, 58, 138, .3);
+    }
+
+        .hero-section::before,
+        .hero-section::after {
+            /* Reducir halos decorativos en móvil para no saturar */
+            width: 220px;
+            height: 220px;
+            opacity: .7;
+        }
+
+    .hero-badge {
+        font-size: .7rem;
+        padding: .35rem .8rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero-title {
+        font-size: 1.9rem;
+        line-height: 1.15;
+        margin-bottom: .75rem;
+    }
+
+    .hero-subtitle {
+        font-size: .95rem;
+        margin-bottom: 1.25rem;
+    }
+
+    /* Botones a ancho completo en móvil */
+    .btn-hero-primary,
+    .btn-hero-secondary {
+        width: 100%;
+        justify-content: center;
+        padding: .7rem 1.2rem;
+        font-size: .95rem;
+    }
+
+    /* Stats: 3 en fila compacta o wrap */
+    .hero-stats {
+        gap: .5rem;
+        margin-top: 1rem !important;
+    }
+
+    .hero-stat {
+        flex: 1 1 calc(33.333% - .5rem);
+        min-width: 90px;
+        flex-direction: column;
+        text-align: center;
+        gap: .25rem;
+        padding: .55rem .35rem;
+    }
+
+        .hero-stat i {
+            font-size: 1.15rem;
+        }
+
+    .hero-stat-value {
+        font-size: .95rem;
+    }
+
+    .hero-stat-label {
+        font-size: .6rem;
+        letter-spacing: .2px;
+        line-height: 1.2;
+    }
+
+    /* Título de sección */
+    .section-title {
+        font-size: 1.15rem;
+    }
+
+    /* Tarjetas más compactas */
+    .module-card-body {
+        padding: 1.35rem 1.1rem 1.15rem;
+    }
+
+    .module-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 1.55rem;
+        border-radius: 14px;
+        margin-bottom: .9rem;
+    }
+
+    .module-title {
+        font-size: 1.05rem;
+        margin-bottom: .4rem;
+    }
+
+    .module-desc {
+        font-size: .88rem;
+        margin-bottom: 1rem;
+    }
+
+    .module-cta {
+        font-size: .88rem;
+    }
+}
+
+/* ===================== Soporte de "notch" / barra de estado ===================== */
+/* En MAUI Blazor Hybrid, el WebView expone el safe area via env()       */
+/* Solo aplica en plataformas que lo soportan (iOS, Android moderno)    */
+
+@supports (padding: max(0px)) {
+    .home-wrapper {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+        padding-top: max(1.5rem, env(safe-area-inset-top));
+        padding-bottom: max(3rem, env(safe-area-inset-bottom));
+    }
+
+    @media (max-width: 575px) {
+        .home-wrapper {
+            padding-left: max(.6rem, env(safe-area-inset-left));
+            padding-right: max(.6rem, env(safe-area-inset-right));
+            padding-top: max(.75rem, env(safe-area-inset-top));
+            padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+        }
+    }
+}
+
+/* ===================== Accesibilidad: menos animación ===================== */
+@media (prefers-reduced-motion: reduce) {
+    .hero-illustration {
+        animation: none;
+    }
+
+    .module-card,
+    .module-icon,
+    .btn-hero-primary,
+    .btn-hero-secondary {
+        transition: none;
+    }
+}

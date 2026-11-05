@@ -1,0 +1,134 @@
+﻿/* Fondo oscuro con degradado moderno */
+.custom-navbar {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Icono de la marca estilizado */
+.brand-icon {
+    background: rgba(13, 110, 253, 0.2);
+    color: #38bdf8;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.brand-title {
+    font-size: 1.1rem;
+    color: #f8fafc;
+}
+
+/* Enlaces del NavMenu y Animaciones en Escritorio */
+.nav-link {
+    color: rgba(241, 245, 249, 0.8) !important;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+}
+
+    .nav-link:hover {
+        color: #ffffff !important;
+        background-color: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+    }
+
+    /* Animación de barra inferior en Escritorio */
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: #38bdf8;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+    }
+
+    .nav-link:hover::after {
+        width: 70%;
+    }
+
+/* Estado Activo en Escritorio */
+::deep .nav-link.active {
+    color: #ffffff !important;
+    background-color: rgba(13, 110, 253, 0.25) !important;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    font-weight: 600;
+}
+
+    ::deep .nav-link.active::after {
+        width: 80%;
+        background: #38bdf8;
+    }
+
+/* Botón Hamburguesa Móvil */
+.navbar-toggler {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px;
+}
+
+    .navbar-toggler:active {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+/* ==========================================
+   OPTIMIZACIONES ESPECÍFICAS PARA MÓVIL
+   ========================================== */
+@media (max-width: 991.88px) {
+    /* Tarjeta flotante para el menú desplegado */
+    .navbar-collapse {
+        background-color: rgba(15, 23, 42, 0.96);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        margin-top: 0.75rem !important;
+        box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Target táctil amplio en enlaces */
+    .nav-link {
+        padding: 0.75rem 1rem !important;
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+    }
+
+        .nav-link:hover {
+            transform: none;
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-link::after {
+            display: none;
+        }
+
+    /* Estado activo móvil: Indicador de barra lateral azul */
+    ::deep .nav-link.active {
+        border: none !important;
+        border-left: 4px solid #38bdf8 !important;
+        background-color: rgba(13, 110, 253, 0.2) !important;
+        border-radius: 4px 10px 10px 4px !important;
+    }
+
+    /* Badge BanQuito adaptado al ancho móvil */
+    .mobile-badge-container {
+        margin-top: 0.5rem;
+    }
+
+        .mobile-badge-container .badge {
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+}

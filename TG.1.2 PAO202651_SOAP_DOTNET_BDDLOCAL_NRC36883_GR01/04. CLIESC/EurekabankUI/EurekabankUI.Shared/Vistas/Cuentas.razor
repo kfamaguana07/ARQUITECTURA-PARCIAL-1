@@ -1,0 +1,102 @@
+﻿@page "/cuentas"
+@inject ec.edu.monster.Servicios.EstadoAplicacion EstadoApp
+@inject ec.edu.monster.Servicios.FabricaEstrategiaBackend Fabrica
+@inject NavigationManager NavManager
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="espe-title mb-0">Listado de Cuentas</h3>
+            <small class="text-secondary">Selecciona una cuenta para ver el detalle</small>
+        </div>
+        <button class="btn btn-outline-secondary" @onclick='() => NavManager.NavigateTo("/menu")'>
+            <i class="bi bi-arrow-left me-1"></i> Volver al Menú
+        </button>
+    </div>
+
+    @if (cargando)
+    {
+        <div class="text-center mt-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2">Cargando cuentas desde el servidor...</p>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <div>@error</div>
+        </div>
+    }
+    else
+    {
+        <div class="espe-card p-4">
+            <!-- Contenedor responsivo para evitar que la tabla se corte en móviles -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th><i class="bi bi-credit-card me-1"></i> Cuenta</th>
+                            <th><i class="bi bi-person me-1"></i> Cliente</th>
+                            <th><i class="bi bi-coin me-1"></i> Moneda</th>
+                            <th><i class="bi bi-cash me-1"></i> Saldo</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in cuentas)
+                        {
+                            <tr>
+                                <td class="fw-bold">@c.Codigo</td>
+                                <td>@c.NombreCliente</td>
+                                <td>@(c.Moneda == "01" ? "Soles" : "Dólares")</td>
+                                <td class="text-success fw-bold">@c.Saldo.ToString("C", new System.Globalization.CultureInfo("es-EC"))</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm espe-btn-primary" @onclick="() => VerDetalle(c.Codigo)">
+                                        <i class="bi bi-eye me-1"></i> Ver Detalle
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<DatosCuenta> cuentas = new();
+    private bool cargando = true;
+    private string error = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (EstadoApp.TokenActual != "OK")
+        {
+            NavManager.NavigateTo("/");
+            return;
+        }
+
+        try
+        {
+            var adaptador = Fabrica.ObtenerAdaptadorBanco(EstadoApp.BackendActual);
+            cuentas = await adaptador.ObtenerCuentasAsync();
+        }
+        catch (Exception ex)
+        {
+            error = TraductorErrores.MensajeAmigable(ex, EstadoApp.BackendActual);
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void VerDetalle(string cuenta)
+    {
+        NavManager.NavigateTo($"/detalle-cuenta/{cuenta}");
+    }
+}

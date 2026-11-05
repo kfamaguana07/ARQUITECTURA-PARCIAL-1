@@ -1,0 +1,179 @@
+﻿@page "/operaciones"
+@inject ec.edu.monster.Servicios.EstadoAplicacion EstadoApp
+@inject ec.edu.monster.Servicios.FabricaEstrategiaBackend Fabrica
+@inject NavigationManager NavManager
+@implements IDisposable
+
+<div class="container mt-5">
+    <button class="btn btn-link mb-3 text-decoration-none" @onclick='() => NavManager.NavigateTo("/menu")'>
+        <i class="bi bi-arrow-left me-1"></i> Volver al Menú
+    </button>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="espe-card p-4">
+                <h3 class="espe-title mb-4 text-center">
+                    <i class="bi bi-sliders text-primary me-2"></i>Centro de Operaciones
+                </h3>
+
+                <!-- Pestañas -->
+                <ul class="nav nav-tabs mb-4">
+                    <li class="nav-item">
+                        <button class="nav-link @(tipoOperacion == "DEPOSITO" ? "active" : "")" @onclick='() => CambiarPestana("DEPOSITO")'>
+                            <i class="bi bi-plus-circle me-1"></i> Depósito
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(tipoOperacion == "RETIRO" ? "active" : "")" @onclick='() => CambiarPestana("RETIRO")'>
+                            <i class="bi bi-dash-circle me-1"></i> Retiro
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(tipoOperacion == "TRANSFERENCIA" ? "active" : "")" @onclick='() => CambiarPestana("TRANSFERENCIA")'>
+                            <i class="bi bi-arrow-left-right me-1"></i> Transferencia
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Formulario -->
+                <div class="mb-3">
+                    <label class="form-label">Cuenta Origen</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                        <input type="text" class="form-control" @bind="cuentaOrigen" @bind:event="oninput" @onfocus="LimpiarMensaje" placeholder="Ej. 00100001" />
+                    </div>
+                </div>
+
+                @if (tipoOperacion == "TRANSFERENCIA")
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Cuenta Destino</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-credit-card-2-front"></i></span>
+                            <input type="text" class="form-control" @bind="cuentaDestino" @bind:event="oninput" @onfocus="LimpiarMensaje" placeholder="Ej. 00200001" />
+                        </div>
+                    </div>
+                }
+
+                <div class="mb-4">
+                    <label class="form-label">Importe</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-cash-stack"></i></span>
+                        <input type="number" class="form-control" @bind="importe" @bind:event="oninput" @onfocus="LimpiarMensaje" step="0.01" min="0.01" />
+                    </div>
+                </div>
+
+                <button class="btn espe-btn-primary w-100" @onclick="EjecutarOperacion" disabled="@procesando">
+                    @if (procesando)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span>Procesando...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-check2-circle me-1"></i>
+                        <span>Confirmar Operación</span>
+                    }
+                </button>
+
+                @if (!string.IsNullOrEmpty(mensaje))
+                {
+                    <div class="alert @(esExito ? "alert-success" : "alert-danger") mt-3 text-center d-flex align-items-center justify-content-center gap-2 fade show">
+                        <i class="bi @(esExito ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill")"></i>
+                        <span>@mensaje</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string tipoOperacion = "DEPOSITO";
+    private string cuentaOrigen = "";
+    private string cuentaDestino = "";
+    private double importe = 0;
+    private bool procesando = false;
+    private string mensaje = "";
+    private bool esExito = false;
+
+    // Temporizador para ocultar el mensaje automáticamente
+    private Timer? _timerMensaje;
+
+    private void CambiarPestana(string tipo)
+    {
+        tipoOperacion = tipo;
+        LimpiarMensaje();
+    }
+
+    private void LimpiarMensaje()
+    {
+        mensaje = "";
+        _timerMensaje?.Dispose();
+    }
+
+    private async Task EjecutarOperacion()
+    {
+        LimpiarMensaje();
+
+        if (string.IsNullOrWhiteSpace(cuentaOrigen) || importe <= 0)
+        {
+            mensaje = "Por favor, complete los campos correctamente.";
+            esExito = false;
+            return;
+        }
+
+        if (tipoOperacion == "TRANSFERENCIA" && string.IsNullOrWhiteSpace(cuentaDestino))
+        {
+            mensaje = "La cuenta destino es obligatoria.";
+            esExito = false;
+            return;
+        }
+
+        procesando = true;
+
+        try
+        {
+            var adaptador = Fabrica.ObtenerAdaptadorBanco(EstadoApp.BackendActual);
+            string destino = tipoOperacion == "TRANSFERENCIA" ? cuentaDestino : "";
+
+            var resultado = await adaptador.RegistrarMovimientoAsync(cuentaOrigen, destino, tipoOperacion, importe);
+
+            if (resultado.Codigo == 1)
+            {
+                esExito = true;
+                mensaje = $"¡{tipoOperacion} realizado con éxito!";
+                importe = 0;
+                cuentaDestino = "";
+
+                // Configuramos el temporizador para que borre el mensaje en 4 segundos
+                _timerMensaje?.Dispose();
+                _timerMensaje = new Timer(_ => InvokeAsync(() =>
+                {
+                    mensaje = "";
+                    StateHasChanged();
+                }), null, 4000, Timeout.Infinite);
+            }
+            else
+            {
+                esExito = false;
+                mensaje = resultado.Mensaje;
+            }
+        }
+        catch (Exception ex)
+        {
+            esExito = false;
+            mensaje = TraductorErrores.MensajeAmigable(ex, EstadoApp.BackendActual);
+        }
+        finally
+        {
+            procesando = false;
+        }
+    }
+
+    // Limpiamos el timer cuando el usuario sale de la página
+    public void Dispose()
+    {
+        _timerMensaje?.Dispose();
+    }
+}

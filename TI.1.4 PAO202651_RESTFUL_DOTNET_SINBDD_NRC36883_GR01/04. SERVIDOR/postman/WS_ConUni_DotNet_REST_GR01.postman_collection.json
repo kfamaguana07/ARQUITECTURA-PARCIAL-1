@@ -1,0 +1,307 @@
+{
+  "info": {
+    "name": "WS_ConUni_DotNet_Rest_GR01 - Conversor de Unidades",
+    "description": "Colección con los endpoints del servicio REST (.NET) del conversor de unidades.\n\n**Base (verificada):** `http://localhost:5135/api`\n\n**Autenticación:** el middleware exige el encabezado `Authorization: Bearer <token>` en todas las rutas excepto `OPTIONS` y las que terminan en `/login`. Primero ejecuta **Seguridad → Login**: el test guarda el token en la variable `token` y las demás peticiones lo envían solas.\n\n**Credenciales:** usuario `Monster` / contrasena `Monster9`.\n\n⚠️ **Importante — nombres de campos:** los DTO usan `[JsonPropertyName(...)]`, así que los nombres del JSON NO coinciden con los de los atributos C#. Hay que enviarlos **exactamente** así (System.Text.Json no distingue errores por defecto si no se configura, los ignora y deja los campos en `null`):\n\n| Endpoint | Campos del body |\n|---|---|\n| `/seguridad/login` | `Usuario`, `Contrasena` |\n| `/seguridad/cambiar-contrasena` | `ContrasenaActual`, `NuevaContrasena` |\n| `/conversiones/*` | `Valor`, `UnidadOrigen`, `UnidadDestino` |\n\nRespuestas: login → `Token`; conversión → `ValorOriginal`, `UnidadOrigen`, `ValorConvertido`, `UnidadDestino`; errores → `mensaje`.\n\n**Unidades válidas** (el servidor hace `ToUpper()`, así que acepta también minúsculas):\n- Longitud: MILIMETRO, CENTIMETRO, METRO, KILOMETRO, YARDA\n- Masa: MILIGRAMO, GRAMO, KILOGRAMO, TONELADA, ONZA\n- Temperatura: CELSIUS, FAHRENHEIT, KELVIN, RANKINE",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Seguridad",
+      "description": "Endpoints de autenticación y gestión de contrasenia.",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Token presente', () => pm.expect(json.Token).to.be.a('string').and.not.empty);",
+                  "pm.collectionVariables.set('token', json.Token);",
+                  "console.log('Token guardado:', json.Token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Usuario\": \"Monster\",\n  \"Contrasena\": \"Monster9\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seguridad/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seguridad",
+                "login"
+              ]
+            },
+            "description": "Autentica al usuario y devuelve un token (UUID) válido para los demás endpoints.\n\n**Body:** `{\"Usuario\":\"Monster\",\"Contrasena\":\"Monster9\"}` (¡con U y C mayúsculas!).\n\n- **200:** `{\"Token\":\"...\"}`\n- **400:** `Usuario y contrasenia son obligatorios` → los campos del body no coinciden con `Usuario`/`Contrasena`\n- **401:** credenciales incorrectas"
+          }
+        },
+        {
+          "name": "Cambiar contrasena",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Respuesta 200 o 400', () => pm.expect([200, 400]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ContrasenaActual\": \"Monster9\",\n  \"NuevaContrasena\": \"NuevaClave123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seguridad/cambiar-contrasena",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seguridad",
+                "cambiar-contrasena"
+              ]
+            },
+            "description": "Cambia la contrasenia del usuario. Requiere token.\n\n**Body:** `{\"ContrasenaActual\":\"Monster9\",\"NuevaContrasena\":\"NuevaClave123\"}`\n\n- **200:** `{\"mensaje\":\"Contrasenia actualizada correctamente\"}`\n- **400:** contrasenia actual incorrecta o campos vacíos\n- **401:** token ausente/inválido\n\n⚠️ La contrasenia vive en memoria: el cambio se pierde al reiniciar el servidor. Ejecútalo solo cuando quieras cambiarla de verdad."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conversiones",
+      "description": "Endpoints de conversión de unidades. Todos requieren token y consumen/producen JSON. Los campos llevan mayúscula inicial (`Valor`, `UnidadOrigen`, `UnidadDestino`).",
+      "item": [
+        {
+          "name": "Convertir longitud",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Estructura de respuesta', () => {",
+                  "    pm.expect(json).to.have.all.keys('ValorOriginal', 'UnidadOrigen', 'ValorConvertido', 'UnidadDestino');",
+                  "    pm.expect(json.ValorConvertido).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Valor\": 100,\n  \"UnidadOrigen\": \"METRO\",\n  \"UnidadDestino\": \"KILOMETRO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/conversiones/longitud",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "conversiones",
+                "longitud"
+              ]
+            },
+            "description": "Convierte entre unidades de longitud.\n\nUnidades: `MILIMETRO`, `CENTIMETRO`, `METRO`, `KILOMETRO`, `YARDA`\n\n- **200:** `{\"ValorOriginal\":100.0,\"UnidadOrigen\":\"METRO\",\"ValorConvertido\":0.1,\"UnidadDestino\":\"KILOMETRO\"}`\n- **400:** campos obligatorios vacíos o unidad inválida\n- **401:** token ausente/inválido"
+          }
+        },
+        {
+          "name": "Convertir masa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Estructura de respuesta', () => {",
+                  "    pm.expect(json).to.have.all.keys('ValorOriginal', 'UnidadOrigen', 'ValorConvertido', 'UnidadDestino');",
+                  "    pm.expect(json.ValorConvertido).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Valor\": 2.5,\n  \"UnidadOrigen\": \"KILOGRAMO\",\n  \"UnidadDestino\": \"GRAMO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/conversiones/masa",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "conversiones",
+                "masa"
+              ]
+            },
+            "description": "Convierte entre unidades de masa.\n\nUnidades: `MILIGRAMO`, `GRAMO`, `KILOGRAMO`, `TONELADA`, `ONZA`\n\n- **200:** objeto de conversión con `ValorOriginal`, `UnidadOrigen`, `ValorConvertido`, `UnidadDestino`\n- **400:** campos obligatorios vacíos o unidad inválida\n- **401:** token ausente/inválido"
+          }
+        },
+        {
+          "name": "Convertir temperatura",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Estructura de respuesta', () => {",
+                  "    pm.expect(json).to.have.all.keys('ValorOriginal', 'UnidadOrigen', 'ValorConvertido', 'UnidadDestino');",
+                  "    pm.expect(json.ValorConvertido).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Valor\": 100,\n  \"UnidadOrigen\": \"CELSIUS\",\n  \"UnidadDestino\": \"FAHRENHEIT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/conversiones/temperatura",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "conversiones",
+                "temperatura"
+              ]
+            },
+            "description": "Convierte entre unidades de temperatura.\n\nUnidades: `CELSIUS`, `FAHRENHEIT`, `KELVIN`, `RANKINE`\n\n- **200:** `{\"ValorOriginal\":100.0,\"UnidadOrigen\":\"CELSIUS\",\"ValorConvertido\":212.0,\"UnidadDestino\":\"FAHRENHEIT\"}`\n- **400:** campos obligatorios vacíos o unidad inválida\n- **401:** token ausente/inválido"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5135/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

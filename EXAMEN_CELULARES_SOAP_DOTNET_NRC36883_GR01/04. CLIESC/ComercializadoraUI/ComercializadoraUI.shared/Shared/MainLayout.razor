@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+
+<div class="d-flex flex-column min-vh-100 bg-light">
+    <!-- Navbar Horizontal en la parte superior -->
+    <header class="sticky-top z-3">
+        <NavMenu />
+    </header>
+
+    <!-- Área de contenido principal -->
+    <main class="flex-grow-1">
+        <div class="container-fluid px-3 px-md-4 py-4">
+            @Body
+        </div>
+    </main>
+
+    <!-- Footer sencillo -->
+    <footer class="bg-white border-top py-3 text-center text-muted small mt-auto">
+        <div class="container">
+            Comercializadora &copy; - Integración N-Capas WCF BanQuito Core
+        </div>
+    </footer>
+</div>

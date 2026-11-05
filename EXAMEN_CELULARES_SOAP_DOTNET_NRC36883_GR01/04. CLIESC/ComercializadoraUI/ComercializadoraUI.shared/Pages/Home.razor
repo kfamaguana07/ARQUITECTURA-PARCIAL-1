@@ -1,0 +1,151 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Routing
+
+<PageTitle>Bienvenido | Comercializadora & BanQuito</PageTitle>
+
+<div class="home-wrapper">
+
+    <!-- ===================== HERO ===================== -->
+    <div class="hero-section mb-4 mb-md-5">
+        <div class="row align-items-center g-3 g-md-4">
+
+            <!-- Texto del hero -->
+            <div class="col-12 col-lg-7 text-center text-lg-start">
+                <span class="hero-badge">
+                    <i class="bi bi-shield-check me-1"></i> Sistema N-Capas WCF
+                </span>
+
+                <h1 class="hero-title">
+                    Comercializadora
+                    <br class="d-none d-md-block" />
+                    de <span class="hero-title-highlight">Celulares</span>
+                </h1>
+
+                <p class="hero-subtitle mx-auto mx-lg-0">
+                    Plataforma integral de facturación e integración en tiempo real con el módulo
+                    de crédito de <strong>BanQuito Core</strong>.
+                </p>
+
+                <!-- Botones -->
+                <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-2 gap-sm-3 mt-4">
+                    <a href="ventas" class="btn btn-hero-primary">
+                        <i class="bi bi-cart-fill me-2"></i>Nueva Venta
+                    </a>
+                    <a href="productos" class="btn btn-hero-secondary">
+                        <i class="bi bi-phone me-2"></i>Ver Catálogo
+                    </a>
+                </div>
+
+                <!-- Mini stats -->
+                <div class="hero-stats mt-4">
+                    <div class="hero-stat">
+                        <i class="bi bi-cash-coin"></i>
+                        <div>
+                            <span class="hero-stat-value">42%</span>
+                            <span class="hero-stat-label">Dto. Efectivo</span>
+                        </div>
+                    </div>
+                    <div class="hero-stat">
+                        <i class="bi bi-percent"></i>
+                        <div>
+                            <span class="hero-stat-value">16.5%</span>
+                            <span class="hero-stat-label">Tasa Anual</span>
+                        </div>
+                    </div>
+                    <div class="hero-stat">
+                        <i class="bi bi-calendar-check"></i>
+                        <div>
+                            <span class="hero-stat-value">3-18</span>
+                            <span class="hero-stat-label">Meses Plazo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ilustración (se oculta o reduce en móvil) -->
+            <div class="col-12 col-lg-5 text-center d-none d-sm-block">
+                <div class="hero-illustration">
+                    <svg class="img-fluid" viewBox="0 0 500 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="500" height="350" rx="20" fill="#0f172a" />
+                        <rect x="180" y="40" width="140" height="270" rx="16" stroke="#38bdf8" stroke-width="6" fill="#020617" />
+                        <circle cx="250" cy="65" r="5" fill="#38bdf8" />
+                        <rect x="195" y="85" width="110" height="180" rx="8" fill="#1e293b" />
+                        <rect x="80" y="140" width="160" height="100" rx="10" fill="#2563eb" fill-opacity="0.95" />
+                        <rect x="80" y="160" width="160" height="20" fill="#1e1b4b" />
+                        <rect x="95" y="195" width="40" height="25" rx="4" fill="#fbbf24" />
+                        <circle cx="380" cy="120" r="45" fill="#16a34a" />
+                        <text x="380" y="115" text-anchor="middle" fill="white" font-size="20" font-weight="bold">-42%</text>
+                        <text x="380" y="135" text-anchor="middle" fill="white" font-size="12">EFECTIVO</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MÓDULOS ===================== -->
+    <div class="d-flex justify-content-between align-items-end mb-3 mb-md-4 flex-wrap gap-2">
+        <div>
+            <h3 class="fw-bold mb-1 section-title">
+                <i class="bi bi-grid-fill text-primary me-2"></i>Módulos del Sistema
+            </h3>
+            <p class="text-muted mb-0 small">Accede rápidamente a las funcionalidades principales</p>
+        </div>
+    </div>
+
+    <div class="row g-3 g-md-4">
+        <!-- Card 1: Catálogo -->
+        <div class="col-12 col-sm-6 col-md-4">
+            <a href="productos" class="module-card text-decoration-none">
+                <div class="module-card-body">
+                    <div class="module-icon icon-primary">
+                        <i class="bi bi-phone"></i>
+                    </div>
+                    <h5 class="module-title">Catálogo de Productos</h5>
+                    <p class="module-desc">
+                        Mantenimiento completo CRUD para los equipos celulares disponibles en inventario.
+                    </p>
+                    <span class="module-cta">
+                        Gestionar Catálogo <i class="bi bi-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Card 2: Ventas -->
+        <div class="col-12 col-sm-6 col-md-4">
+            <a href="ventas" class="module-card text-decoration-none">
+                <div class="module-card-body">
+                    <div class="module-icon icon-success">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                    <h5 class="module-title">Facturación & Crédito</h5>
+                    <p class="module-desc">
+                        Procesa compras en efectivo con 42% de descuento o Crédito Directo integrado con BanQuito SOAP.
+                    </p>
+                    <span class="module-cta">
+                        Procesar Factura <i class="bi bi-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Card 3: Amortización -->
+        <div class="col-12 col-sm-6 col-md-4">
+            <a href="amortizacion" class="module-card text-decoration-none">
+                <div class="module-card-body">
+                    <div class="module-icon icon-info">
+                        <i class="bi bi-calculator"></i>
+                    </div>
+                    <h5 class="module-title">Tabla de Amortización</h5>
+                    <p class="module-desc">
+                        Consulta la tabla de cuotas fijas (Sistema Francés, 16.5% interés anual) asociadas a un crédito.
+                    </p>
+                    <span class="module-cta">
+                        Consultar Tablas <i class="bi bi-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</div>

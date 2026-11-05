@@ -1,0 +1,22 @@
+﻿@using Microsoft.AspNetCore.Components.Routing
+@using ComercializadoraUI.shared.Shared
+
+<Router AppAssembly="@typeof(Program).Assembly"
+        AdditionalAssemblies="new[] { typeof(ComercializadoraUI.shared.Pages.Home).Assembly }">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>404 - No Encontrado</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <div class="container py-5 text-center">
+                <h3 class="text-danger"><i class="bi bi-exclamation-triangle me-2"></i>404 - Página no encontrada</h3>
+                <p class="text-muted">La ruta especificada no existe en el sistema.</p>
+                <a href="" class="btn btn-primary mt-3">
+                    <i class="bi bi-house-door me-1"></i> Volver al Inicio
+                </a>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>

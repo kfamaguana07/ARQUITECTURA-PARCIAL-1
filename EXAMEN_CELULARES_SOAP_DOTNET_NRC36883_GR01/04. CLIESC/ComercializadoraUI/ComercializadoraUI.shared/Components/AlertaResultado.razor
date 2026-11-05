@@ -1,0 +1,21 @@
+﻿@if (!string.IsNullOrEmpty(Mensaje))
+{
+    <div class="alert @(EsError ? "alert-danger" : "alert-success") alert-dismissible fade show my-3 shadow-sm" role="alert">
+        <strong>@(EsError ? "¡Error!" : "¡Éxito!")</strong> @Mensaje
+        <button type="button" class="btn-close" @onclick="CerrarAlerta" aria-label="Close"></button>
+    </div>
+}
+
+@code {
+    [Parameter] public string Mensaje { get; set; } = string.Empty;
+    [Parameter] public bool EsError { get; set; } = false;
+    [Parameter] public EventCallback OnCerrar { get; set; }
+
+    private async Task CerrarAlerta()
+    {
+        if (OnCerrar.HasDelegate)
+        {
+            await OnCerrar.InvokeAsync();
+        }
+    }
+}

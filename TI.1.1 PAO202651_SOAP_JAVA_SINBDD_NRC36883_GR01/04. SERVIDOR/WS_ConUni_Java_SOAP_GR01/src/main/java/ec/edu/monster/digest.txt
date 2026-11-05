@@ -1,0 +1,732 @@
+Directory structure:
+└── monster/
+    ├── controladores/
+    │   ├── manejadoresws/
+    │   │   └── ManejadorAutenticacion.java
+    │   └── ws/
+    │       └── WSConversorUnidades.java
+    ├── modelos/
+    │   └── utilidades/
+    │       ├── ConversorLongitud.java
+    │       ├── ConversorMasa.java
+    │       ├── ConversorTemperatura.java
+    │       ├── IConversor.java
+    │       ├── enums/
+    │       │   ├── UnidadLongitud.java
+    │       │   ├── UnidadMasa.java
+    │       │   └── UnidadTemperatura.java
+    │       └── mapeadores/
+    │           └── UnidadMapper.java
+    ├── pruebas/
+    │   ├── ConversorLongitudPrueba.java
+    │   ├── ConversorMasaPrueba.java
+    │   └── ConversorTemperaturaPrueba.java
+    ├── seguridad/
+    │   ├── AdministradorCredenciales.java
+    │   ├── AdministradorTokens.java
+    │   └── FiltroCors.java
+    └── servicios/
+        └── ServicioConversor.java
+
+================================================
+FILE: controladores/manejadoresws/ManejadorAutenticacion.java
+================================================
+package ec.edu.monster.controladores.manejadoresws;
+
+import ec.edu.monster.seguridad.AdministradorTokens;
+import jakarta.xml.ws.handler.soap.SOAPHandler;
+import jakarta.xml.ws.handler.soap.SOAPMessageContext;
+import jakarta.xml.ws.handler.MessageContext;
+
+import javax.xml.namespace.QName;
+import org.w3c.dom.NodeList;
+import java.util.Set;
+
+public class ManejadorAutenticacion implements SOAPHandler<SOAPMessageContext> {
+
+    @Override
+    public boolean handleMessage(SOAPMessageContext contexto) {
+
+        Boolean esSalida = (Boolean) contexto.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+
+        if (!esSalida) {
+            try {
+
+                QName operacion = (QName) contexto.get(MessageContext.WSDL_OPERATION);
+                if (operacion != null && "login".equals(operacion.getLocalPart())) {
+                    return true; 
+                }
+
+                var mensajeSOAP = contexto.getMessage();
+                var encabezado = mensajeSOAP.getSOAPHeader();
+
+                if (encabezado == null) {
+                    throw new RuntimeException("Acceso denegado: Se requiere encabezado SOAP con el token de seguridad.");
+                }
+
+                NodeList nodosToken = encabezado.getElementsByTagNameNS("*", "token");
+
+                if (nodosToken.getLength() == 0) {
+                    throw new RuntimeException("Acceso denegado: No se encontrÃ³ el token. Inicie sesiÃ³n primero.");
+                }
+
+                String token = nodosToken.item(0).getTextContent();
+
+                if (!AdministradorTokens.validarToken(token)) {
+                    throw new RuntimeException("Acceso denegado: Token invÃ¡lido o expirado.");
+                }
+
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public Set<QName> getHeaders() {
+        return null;
+    }
+
+    @Override
+    public boolean handleFault(SOAPMessageContext contexto) {
+        return true;
+    }
+
+    @Override
+    public void close(MessageContext contexto) {}
+}
+
+
+================================================
+FILE: controladores/ws/WSConversorUnidades.java
+================================================
+package ec.edu.monster.controladores.ws;
+
+import ec.edu.monster.modelos.utilidades.enums.UnidadTemperatura;
+import ec.edu.monster.modelos.utilidades.enums.UnidadMasa;
+import ec.edu.monster.modelos.utilidades.enums.UnidadLongitud;
+import ec.edu.monster.modelos.utilidades.ConversorTemperatura;
+import ec.edu.monster.modelos.utilidades.ConversorMasa;
+import ec.edu.monster.modelos.utilidades.ConversorLongitud;
+import ec.edu.monster.servicios.ServicioConversor;
+import ec.edu.monster.modelos.utilidades.mapeadores.UnidadMapper;
+import ec.edu.monster.seguridad.AdministradorCredenciales;
+import ec.edu.monster.seguridad.AdministradorTokens;
+
+import jakarta.jws.WebService;
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebParam;
+
+@WebService(serviceName = "WSConversorUnidades")
+public class WSConversorUnidades {
+
+    private final ServicioConversor<UnidadLongitud> servicioLongitud =
+            new ServicioConversor<>(new ConversorLongitud());
+
+    private final ServicioConversor<UnidadMasa> servicioMasa =
+            new ServicioConversor<>(new ConversorMasa());
+
+    private final ServicioConversor<UnidadTemperatura> servicioTemperatura =
+            new ServicioConversor<>(new ConversorTemperatura());
+
+    @WebMethod(operationName = "login")
+    public String login(
+            @WebParam(name = "usuario") String usuario,
+            @WebParam(name = "contrasenia") String contrasenia) {
+        
+        if (AdministradorCredenciales.validarCredenciales(usuario, contrasenia)) {
+            return AdministradorTokens.generarToken();
+        }
+        throw new RuntimeException("Credenciales incorrectas");
+    }
+
+    @WebMethod(operationName = "cambiarContrasenia")
+    public String cambiarContrasenia(
+            @WebParam(name = "contraseniaActual") String contraseniaActual,
+            @WebParam(name = "contraseniaNueva") String contraseniaNueva) {
+        AdministradorCredenciales.cambiarContrasenia(contraseniaActual, contraseniaNueva);
+        return "Contrasenia actualizada correctamente";
+    }
+   
+    @WebMethod(operationName = "convertirLongitud")
+    public double convertirLongitud(
+            @WebParam(name = "valor") double valor,
+            @WebParam(name = "unidadInicial") String unidadInicial,
+            @WebParam(name = "unidadFinal") String unidadFinal) {
+
+        UnidadLongitud origen = UnidadMapper.toLongitud(unidadInicial);
+        UnidadLongitud destino = UnidadMapper.toLongitud(unidadFinal);
+
+        return servicioLongitud.convertir(valor, origen, destino);
+    }
+    
+    @WebMethod(operationName = "convertirMasa")
+    public double convertirMasa(
+            @WebParam(name = "valor") double valor,
+            @WebParam(name = "unidadInicial") String unidadInicial,
+            @WebParam(name = "unidadFinal") String unidadFinal) {
+
+        UnidadMasa origen = UnidadMapper.toMasa(unidadInicial);
+        UnidadMasa destino = UnidadMapper.toMasa(unidadFinal);
+
+        return servicioMasa.convertir(valor, origen, destino);
+    }
+
+    @WebMethod(operationName = "convertirTemperatura")
+    public double convertirTemperatura(
+            @WebParam(name = "valor") double valor,
+            @WebParam(name = "unidadInicial") String unidadInicial,
+            @WebParam(name = "unidadFinal") String unidadFinal) {
+
+        UnidadTemperatura origen = UnidadMapper.toTemperatura(unidadInicial);
+        UnidadTemperatura destino = UnidadMapper.toTemperatura(unidadFinal);
+
+        return servicioTemperatura.convertir(valor, origen, destino);
+    }
+}
+
+
+
+================================================
+FILE: modelos/utilidades/ConversorLongitud.java
+================================================
+package ec.edu.monster.modelos.utilidades;
+
+import ec.edu.monster.modelos.utilidades.enums.UnidadLongitud;
+import java.util.Map;
+
+public class ConversorLongitud implements IConversor<UnidadLongitud> {
+
+    private final Map<UnidadLongitud, Double> factores = Map.of(
+        UnidadLongitud.MILIMETRO, 0.001,
+        UnidadLongitud.CENTIMETRO, 0.01,
+        UnidadLongitud.METRO, 1.0,
+        UnidadLongitud.KILOMETRO, 1000.0,
+        UnidadLongitud.YARDA, 0.9144
+    );
+
+    public ConversorLongitud() {}
+
+    @Override
+    public double convertir(double valor, UnidadLongitud unidadOrigen, UnidadLongitud unidadFinal) {
+
+        if (unidadOrigen == null || unidadFinal == null) {
+            throw new IllegalArgumentException("Las unidades no pueden ser null");
+        }
+        if (!factores.containsKey(unidadOrigen) || !factores.containsKey(unidadFinal)) {
+            throw new IllegalArgumentException("Unidad no soportada");
+        }
+
+        double valorEnBase = valor * factores.get(unidadOrigen);
+
+        return valorEnBase / factores.get(unidadFinal);
+    }
+}
+
+
+================================================
+FILE: modelos/utilidades/ConversorMasa.java
+================================================
+package ec.edu.monster.modelos.utilidades;
+
+import ec.edu.monster.modelos.utilidades.enums.UnidadMasa;
+import java.util.Map;
+
+public class ConversorMasa implements IConversor<UnidadMasa> {
+
+    private final Map<UnidadMasa, Double> factores = Map.of(
+        UnidadMasa.MILIGRAMO, 0.001,
+        UnidadMasa.GRAMO, 1.0,
+        UnidadMasa.KILOGRAMO, 1000.0,
+        UnidadMasa.TONELADA, 1_000_000.0,
+        UnidadMasa.ONZA, 28.3495
+    );
+
+    public ConversorMasa() {}
+
+    @Override
+    public double convertir(double valor, UnidadMasa unidadOrigen, UnidadMasa unidadFinal) {
+
+        if (unidadOrigen == null || unidadFinal == null) {
+            throw new IllegalArgumentException("Las unidades no pueden ser null");
+        }
+        if (!factores.containsKey(unidadOrigen) || !factores.containsKey(unidadFinal)) {
+            throw new IllegalArgumentException("Unidad no soportada");
+        }
+
+        double valorEnBase = valor * factores.get(unidadOrigen);
+
+        return valorEnBase / factores.get(unidadFinal);
+    }
+}
+
+
+================================================
+FILE: modelos/utilidades/ConversorTemperatura.java
+================================================
+package ec.edu.monster.modelos.utilidades;
+
+import ec.edu.monster.modelos.utilidades.enums.UnidadTemperatura;
+import static ec.edu.monster.modelos.utilidades.enums.UnidadTemperatura.CELSIUS;
+import static ec.edu.monster.modelos.utilidades.enums.UnidadTemperatura.FAHRENHEIT;
+import static ec.edu.monster.modelos.utilidades.enums.UnidadTemperatura.KELVIN;
+import static ec.edu.monster.modelos.utilidades.enums.UnidadTemperatura.RANKINE;
+
+public class ConversorTemperatura implements IConversor<UnidadTemperatura> {
+
+    public ConversorTemperatura() {}
+
+    @Override
+    public double convertir(double valor, UnidadTemperatura origen, UnidadTemperatura destino) {
+
+        if (origen == null || destino == null) {
+            throw new IllegalArgumentException("Las unidades no pueden ser null");
+        }
+        if (origen == destino) {
+            return valor;
+        }
+
+        return switch (origen) {
+
+            case CELSIUS -> switch (destino) {
+                case FAHRENHEIT -> (valor * 9 / 5) + 32;
+                case KELVIN -> valor + 273.15;
+                case RANKINE -> (valor + 273.15) * 9 / 5;
+                default -> throw new IllegalArgumentException("ConversiÃ³n no soportada");
+            };
+
+            case FAHRENHEIT -> switch (destino) {
+                case CELSIUS -> (valor - 32) * 5 / 9;
+                case KELVIN -> (valor - 32) * 5 / 9 + 273.15;
+                case RANKINE -> valor + 459.67;
+                default -> throw new IllegalArgumentException("ConversiÃ³n no soportada");
+            };
+
+            case KELVIN -> switch (destino) {
+                case CELSIUS -> valor - 273.15;
+                case FAHRENHEIT -> (valor - 273.15) * 9 / 5 + 32;
+                case RANKINE -> valor * 9 / 5;
+                default -> throw new IllegalArgumentException("ConversiÃ³n no soportada");
+            };
+
+            case RANKINE -> switch (destino) {
+                case CELSIUS -> (valor - 491.67) * 5 / 9;
+                case FAHRENHEIT -> valor - 459.67;
+                case KELVIN -> valor * 5 / 9;
+                default -> throw new IllegalArgumentException("ConversiÃ³n no soportada");
+            };
+        };
+    }
+}
+
+
+================================================
+FILE: modelos/utilidades/IConversor.java
+================================================
+package ec.edu.monster.modelos.utilidades;
+
+public interface IConversor<T> {
+
+    public double convertir(double valor, T unidadInicial, T unidadFinal);
+    
+}
+
+
+
+================================================
+FILE: modelos/utilidades/enums/UnidadLongitud.java
+================================================
+package ec.edu.monster.modelos.utilidades.enums;
+
+public enum UnidadLongitud {
+    MILIMETRO,
+    CENTIMETRO,
+    METRO,
+    KILOMETRO,
+    YARDA
+}
+
+
+
+================================================
+FILE: modelos/utilidades/enums/UnidadMasa.java
+================================================
+package ec.edu.monster.modelos.utilidades.enums;
+
+public enum UnidadMasa {
+    MILIGRAMO,
+    GRAMO,
+    KILOGRAMO,
+    TONELADA,
+    ONZA
+}
+
+
+
+================================================
+FILE: modelos/utilidades/enums/UnidadTemperatura.java
+================================================
+package ec.edu.monster.modelos.utilidades.enums;
+
+public enum UnidadTemperatura {
+    CELSIUS,
+    FAHRENHEIT,
+    KELVIN,
+    RANKINE
+}
+
+
+
+================================================
+FILE: modelos/utilidades/mapeadores/UnidadMapper.java
+================================================
+package ec.edu.monster.modelos.utilidades.mapeadores;
+
+import ec.edu.monster.modelos.utilidades.enums.UnidadTemperatura;
+import ec.edu.monster.modelos.utilidades.enums.UnidadMasa;
+import ec.edu.monster.modelos.utilidades.enums.UnidadLongitud;
+
+public class UnidadMapper {
+
+    public static UnidadLongitud toLongitud(String unidad) {
+        try {
+            return UnidadLongitud.valueOf(unidad.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Unidad de longitud invÃ¡lida: " + unidad);
+        }
+    }
+
+    public static UnidadMasa toMasa(String unidad) {
+        try {
+            return UnidadMasa.valueOf(unidad.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Unidad de masa invÃ¡lida: " + unidad);
+        }
+    }
+
+    public static UnidadTemperatura toTemperatura(String unidad) {
+        try {
+            return UnidadTemperatura.valueOf(unidad.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Unidad de temperatura invÃ¡lida: " + unidad);
+        }
+    }
+}
+
+
+================================================
+FILE: pruebas/ConversorLongitudPrueba.java
+================================================
+package ec.edu.monster.pruebas;
+
+import ec.edu.monster.modelos.utilidades.ConversorLongitud;
+import ec.edu.monster.modelos.utilidades.enums.UnidadLongitud;
+
+import java.util.Scanner;
+
+public class ConversorLongitudPrueba {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        ConversorLongitud conversor = new ConversorLongitud();
+
+        System.out.print("Ingrese valor: ");
+        double valor = sc.nextDouble();
+
+        System.out.print("Unidad origen: ");
+        String origen = sc.next();
+
+        System.out.print("Unidad destino: ");
+        String destino = sc.next();
+
+        try {
+            double resultado = conversor.convertir(
+                    valor,
+                    UnidadLongitud.valueOf(origen.toUpperCase()),
+                    UnidadLongitud.valueOf(destino.toUpperCase())
+            );
+
+            System.out.println("Resultado: " + resultado);
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
+
+
+================================================
+FILE: pruebas/ConversorMasaPrueba.java
+================================================
+package ec.edu.monster.pruebas;
+
+import ec.edu.monster.modelos.utilidades.ConversorMasa;
+import ec.edu.monster.modelos.utilidades.enums.UnidadMasa;
+
+import java.util.Scanner;
+
+public class ConversorMasaPrueba {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        ConversorMasa conversor = new ConversorMasa();
+
+        System.out.print("Ingrese valor: ");
+        double valor = sc.nextDouble();
+
+        System.out.print("Unidad origen: ");
+        String origen = sc.next();
+
+        System.out.print("Unidad destino: ");
+        String destino = sc.next();
+
+        try {
+            double resultado = conversor.convertir(
+                    valor,
+                    UnidadMasa.valueOf(origen.toUpperCase()),
+                    UnidadMasa.valueOf(destino.toUpperCase())
+            );
+
+            System.out.println("Resultado: " + resultado);
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
+
+
+================================================
+FILE: pruebas/ConversorTemperaturaPrueba.java
+================================================
+package ec.edu.monster.pruebas;
+
+import ec.edu.monster.modelos.utilidades.ConversorTemperatura;
+import ec.edu.monster.modelos.utilidades.enums.UnidadTemperatura;
+
+import java.util.Scanner;
+
+public class ConversorTemperaturaPrueba {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        ConversorTemperatura conversor = new ConversorTemperatura();
+
+        System.out.print("Ingrese valor: ");
+        double valor = sc.nextDouble();
+
+        System.out.print("Unidad origen: ");
+        String origen = sc.next();
+
+        System.out.print("Unidad destino: ");
+        String destino = sc.next();
+
+        try {
+            double resultado = conversor.convertir(
+                    valor,
+                    UnidadTemperatura.valueOf(origen.toUpperCase()),
+                    UnidadTemperatura.valueOf(destino.toUpperCase())
+            );
+
+            System.out.println("Resultado: " + resultado);
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
+
+
+================================================
+FILE: seguridad/AdministradorCredenciales.java
+================================================
+package ec.edu.monster.seguridad;
+
+public final class AdministradorCredenciales {
+
+    private static final String USUARIO = "Monster";
+    private static String contrasenia = "Monster9";
+
+    private AdministradorCredenciales() {
+    }
+
+    public static synchronized boolean validarCredenciales(String usuario, String contraseniaIngresada) {
+        return USUARIO.equals(usuario) && contrasenia.equals(contraseniaIngresada);
+    }
+
+    public static synchronized void cambiarContrasenia(String contraseniaActual, String contraseniaNueva) {
+        if (!contrasenia.equals(contraseniaActual)) {
+            throw new RuntimeException("La contrasenia actual es incorrecta");
+        }
+
+        if (contraseniaNueva == null || contraseniaNueva.isBlank()) {
+            throw new RuntimeException("La nueva contrasenia es obligatoria");
+        }
+
+        contrasenia = contraseniaNueva;
+    }
+}
+
+
+
+================================================
+FILE: seguridad/AdministradorTokens.java
+================================================
+package ec.edu.monster.seguridad;
+
+import java.util.Set;
+import java.util.HashSet;
+import java.util.UUID;
+
+public class AdministradorTokens {
+    
+    private static final Set<String> tokensActivos = new HashSet<>();
+
+    public static String generarToken() {
+    
+        String token = UUID.randomUUID().toString();
+        tokensActivos.add(token);
+        return token;
+    }
+
+    public static boolean validarToken(String token) {
+        return tokensActivos.contains(token);
+    }
+}
+
+
+================================================
+FILE: seguridad/FiltroCors.java
+================================================
+package ec.edu.monster.seguridad;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Filtro CORS global para exponer servicios REST/SOAP a clientes web.
+ */
+public class FiltroCors implements Filter {
+
+    private static final String PARAM_ORIGENES = "cors.allowed.origins";
+    private static final String PARAM_METODOS = "cors.allowed.methods";
+    private static final String PARAM_HEADERS = "cors.allowed.headers";
+    private static final String PARAM_MAX_AGE = "cors.max.age";
+    private static final String PARAM_CREDENCIALES = "cors.allow.credentials";
+
+    private static final String ORIGENES_DEFECTO = "*";
+    private static final String METODOS_DEFECTO = "GET,POST,PUT,DELETE,OPTIONS";
+    private static final String HEADERS_DEFECTO = "Origin,Content-Type,Accept,Authorization,SOAPAction,X-Requested-With";
+    private static final String MAX_AGE_DEFECTO = "3600";
+
+    private Set<String> origenesPermitidos = Collections.emptySet();
+    private boolean permitirTodosLosOrigenes;
+    private boolean permitirCredenciales;
+    private String metodosPermitidos;
+    private String headersPermitidos;
+    private String maxAge;
+
+    @Override
+    public void init(FilterConfig filterConfig) {
+        origenesPermitidos = parseLista(filterConfig.getInitParameter(PARAM_ORIGENES), ORIGENES_DEFECTO);
+        permitirTodosLosOrigenes = origenesPermitidos.contains("*");
+        permitirCredenciales = Boolean.parseBoolean(
+                valorPorDefecto(filterConfig.getInitParameter(PARAM_CREDENCIALES), "false")
+        );
+        metodosPermitidos = valorPorDefecto(filterConfig.getInitParameter(PARAM_METODOS), METODOS_DEFECTO);
+        headersPermitidos = valorPorDefecto(filterConfig.getInitParameter(PARAM_HEADERS), HEADERS_DEFECTO);
+        maxAge = valorPorDefecto(filterConfig.getInitParameter(PARAM_MAX_AGE), MAX_AGE_DEFECTO);
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        if (!(request instanceof HttpServletRequest httpRequest) || !(response instanceof HttpServletResponse httpResponse)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        String origen = httpRequest.getHeader("Origin");
+
+        if (origen != null && (permitirTodosLosOrigenes || origenesPermitidos.contains(origen))) {
+            httpResponse.setHeader("Access-Control-Allow-Origin", permitirTodosLosOrigenes ? "*" : origen);
+            httpResponse.setHeader("Vary", "Origin");
+        }
+
+        if (permitirCredenciales && !permitirTodosLosOrigenes) {
+            httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+
+        httpResponse.setHeader("Access-Control-Allow-Methods", metodosPermitidos);
+        httpResponse.setHeader("Access-Control-Allow-Headers", headersPermitidos);
+        httpResponse.setHeader("Access-Control-Max-Age", maxAge);
+
+        if ("OPTIONS".equalsIgnoreCase(httpRequest.getMethod())) {
+            httpResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            return;
+        }
+
+        chain.doFilter(request, response);
+    }
+
+    @Override
+    public void destroy() {
+        // No resources to release.
+    }
+
+    private static Set<String> parseLista(String valor, String valorDefecto) {
+        return Arrays.stream(valorPorDefecto(valor, valorDefecto).split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private static String valorPorDefecto(String valor, String valorDefecto) {
+        if (valor == null || valor.isBlank()) {
+            return valorDefecto;
+        }
+        return valor;
+    }
+}
+
+
+================================================
+FILE: servicios/ServicioConversor.java
+================================================
+package ec.edu.monster.servicios;
+
+import ec.edu.monster.modelos.utilidades.IConversor;
+
+public class ServicioConversor<T> {
+
+    private final IConversor<T> conversor;
+
+    public ServicioConversor(IConversor<T> conversor) {
+        this.conversor = conversor;
+    }
+
+    public double convertir(double valor, T origen, T destino) {
+        if (conversor == null) {
+            throw new IllegalStateException("No se ha inyectado un conversor");
+        }
+        return conversor.convertir(valor, origen, destino);
+    }
+}
+

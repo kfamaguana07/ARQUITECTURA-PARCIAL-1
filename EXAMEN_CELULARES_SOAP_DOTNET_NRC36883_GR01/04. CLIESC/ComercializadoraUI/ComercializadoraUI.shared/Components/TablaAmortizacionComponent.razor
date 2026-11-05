@@ -1,0 +1,123 @@
+﻿@using System.Linq
+@using ComercializadoraServiceReference
+
+@if (Tabla != null && Tabla.Any())
+{
+    <div class="card border-0 shadow-sm tabla-card mb-4">
+        <!-- Header con degradado verde -->
+        <div class="card-header tabla-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center">
+                <div class="header-icon-sm">
+                    <i class="bi bi-table"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold fs-6 fs-md-5">Tabla de Amortización</h5>
+                    <small class="opacity-75">Sistema Francés · Tasa 16.5% Anual</small>
+                </div>
+            </div>
+            @if (CodigoCredito > 0)
+            {
+                <span class="credito-badge">
+                    <i class="bi bi-hash"></i>Crédito @CodigoCredito
+                </span>
+            }
+        </div>
+
+        <!-- VISTA ESCRITORIO (Tabla - d-none d-md-block) -->
+        <div class="card-body p-0 table-responsive d-none d-md-block">
+            <table class="table tabla-amortizacion mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th class="text-center ps-4"># Cuota</th>
+                        <th class="text-end">Valor Cuota</th>
+                        <th class="text-end">Interés Pagado</th>
+                        <th class="text-end">Capital Pagado</th>
+                        <th class="text-end pe-4">Saldo Restante</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cuota in Tabla)
+                    {
+                        <tr>
+                            <td class="text-center ps-4">
+                                <span class="cuota-badge">@cuota.NumCuota</span>
+                            </td>
+                            <td class="text-end fw-semibold text-primary">$@cuota.ValorCuota.ToString("N2")</td>
+                            <td class="text-end text-danger">$@cuota.InteresPagado.ToString("N2")</td>
+                            <td class="text-end text-success">$@cuota.CapitalPagado.ToString("N2")</td>
+                            <td class="text-end pe-4 fw-semibold">$@cuota.SaldoRestante.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td class="text-center ps-4 fw-bold">TOTALES</td>
+                        <td class="text-end fw-bold text-primary">$@Tabla.Sum(c => c.ValorCuota).ToString("N2")</td>
+                        <td class="text-end fw-bold text-danger">$@Tabla.Sum(c => c.InteresPagado).ToString("N2")</td>
+                        <td class="text-end fw-bold text-success">$@Tabla.Sum(c => c.CapitalPagado).ToString("N2")</td>
+                        <td class="text-end pe-4 text-muted">—</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- VISTA MÓVIL (Tarjetas de cuotas - d-block d-md-none) -->
+        <div class="card-body p-3 d-block d-md-none bg-light-subtle">
+            <!-- Tarjeta con resumen global de totales -->
+            <div class="mobile-totals-box p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small">Total Pagado:</span>
+                    <strong class="text-primary fs-6">$@Tabla.Sum(c => c.ValorCuota).ToString("N2")</strong>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small">Total Intereses:</span>
+                    <strong class="text-danger small">$@Tabla.Sum(c => c.InteresPagado).ToString("N2")</strong>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">Total Capital:</span>
+                    <strong class="text-success small">$@Tabla.Sum(c => c.CapitalPagado).ToString("N2")</strong>
+                </div>
+            </div>
+
+            <!-- Lista itemizada de cuotas -->
+            <div class="d-flex flex-column gap-2">
+                @foreach (var cuota in Tabla)
+                {
+                    <div class="card border shadow-xs cuota-mobile-card">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <span class="cuota-badge me-2">@cuota.NumCuota</span>
+                                    <span class="fw-semibold text-dark small">Cuota mensual</span>
+                                </div>
+                                <span class="fw-bold text-primary fs-6">$@cuota.ValorCuota.ToString("N2")</span>
+                            </div>
+                            <div class="row g-2 text-center">
+                                <div class="col-4 border-end">
+                                    <span class="d-block text-muted micro-text">Capital</span>
+                                    <span class="fw-semibold text-success small">$@cuota.CapitalPagado.ToString("N2")</span>
+                                </div>
+                                <div class="col-4 border-end">
+                                    <span class="d-block text-muted micro-text">Interés</span>
+                                    <span class="fw-semibold text-danger small">$@cuota.InteresPagado.ToString("N2")</span>
+                                </div>
+                                <div class="col-4">
+                                    <span class="d-block text-muted micro-text">Saldo</span>
+                                    <span class="fw-semibold text-secondary small">$@cuota.SaldoRestante.ToString("N2")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public IEnumerable<CuotaAmortizacion> Tabla { get; set; }
+
+    [Parameter]
+    public int CodigoCredito { get; set; }
+}

@@ -1,0 +1,355 @@
+@page "/conversor"
+@using System.Globalization
+@inject ec.edu.monster.Servicios.EstadoAplicacion EstadoApp
+@inject ec.edu.monster.Servicios.FabricaEstrategiaBackend Fabrica
+@inject NavigationManager NavManager
+
+<div class="espe-background flex-column" style="justify-content: flex-start; align-items: stretch;">
+
+    <!-- ===== Header: título + estado de sesión (perfil) ===== -->
+    <div class="espe-card espe-overflow-visible w-100 p-3 mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+
+        <div>
+            <h4 class="espe-title mb-0">Conversor de unidades</h4>
+            <small class="text-secondary">Longitud, masa y temperatura con seguridad por token</small>
+        </div>
+
+        <!-- Perfil / sesión agrupados en la esquina superior derecha -->
+        <div class="espe-profile align-self-end align-self-md-center">
+            <button type="button" class="espe-profile-btn" @onclick="ToggleMenuPerfil" @onclick:stopPropagation="true">
+                <span class="espe-avatar">👤</span>
+                <span class="espe-profile-text d-none d-sm-flex flex-column">
+                    <span class="espe-profile-name">@EstadoApp.BackendActual</span>
+                    <span class="espe-profile-sub">Sesión activa</span>
+                </span>
+                <span class="espe-caret">▾</span>
+            </button>
+
+            @if (menuPerfilAbierto)
+            {
+                <div class="espe-backdrop" @onclick="CerrarMenuPerfil"></div>
+                <div class="espe-menu">
+                    <div class="espe-menu-header">
+                        <div class="fw-bold" style="font-size:.9rem;">Sesión activa</div>
+                        <small class="text-secondary">Entorno: @EstadoApp.BackendActual</small>
+                    </div>
+                    <div class="espe-menu-divider"></div>
+                    <button type="button" class="espe-menu-item" @onclick="IrAPerfil">
+                        <span class="espe-menu-icon">⚙️</span> Perfil
+                    </button>
+                    <button type="button" class="espe-menu-item" @onclick="AbrirDiagnostico">
+                        <span class="espe-menu-icon">🧭</span> Diagnóstico
+                    </button>
+                    <div class="espe-menu-divider"></div>
+                    <button type="button" class="espe-menu-item espe-menu-item--danger" @onclick="CerrarSesion">
+                        <span class="espe-menu-icon">↩</span> Cerrar sesión
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- ===== Formulario + Resultado ===== -->
+        <div class="col-md-6 mb-4">
+            <div class="espe-card p-4 h-100 d-flex flex-column">
+
+                <div class="mb-3">
+                    <label class="fw-bold text-secondary">Tipo de conversión</label>
+                    <select class="form-select espe-form-control" value="@magnitudSeleccionada" @onchange="OnMagnitudChanged">
+                        @foreach (var magnitud in Enum.GetValues<TipoMagnitud>())
+                        {
+                            <option value="@magnitud">@magnitud</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="fw-bold text-secondary">Valor</label>
+                    <input type="number" class="form-control espe-form-control" @bind="peticion.Valor" />
+                </div>
+
+                <!-- Unidades con botón central de intercambio (⇄) -->
+                <div class="espe-units mb-4">
+                    <div class="espe-unit">
+                        <label class="fw-bold text-secondary">Unidad inicial</label>
+                        <select class="form-select espe-form-control" @bind="peticion.UnidadOrigen">
+                            @RenderizarOpcionesUnidad()
+                        </select>
+                    </div>
+
+                    <button type="button" class="espe-swap" title="Intercambiar unidades" @onclick="IntercambiarUnidades">
+                        <span class="espe-swap-icon">⇄</span>
+                    </button>
+
+                    <div class="espe-unit">
+                        <label class="fw-bold text-secondary">Unidad final</label>
+                        <select class="form-select espe-form-control" @bind="peticion.UnidadDestino">
+                            @RenderizarOpcionesUnidad()
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn espe-btn-primary flex-grow-1" @onclick="EjecutarConversion">Convertir</button>
+                    <button class="btn espe-btn-ghost" @onclick="Limpiar">Limpiar</button>
+                </div>
+
+                @if (!string.IsNullOrEmpty(mensajeError))
+                {
+                    <div class="alert alert-danger mt-3 mb-0 p-2 text-center" style="font-size:.9rem;">@mensajeError</div>
+                }
+
+                <!-- ===== Área de resultado destacada ===== -->
+                <div class="espe-result-card mt-4 @(resultadoNumerico is null ? "espe-result-card--idle" : "")">
+                    @if (resultadoNumerico is not null)
+                    {
+                        <div class="espe-result-label">Resultado</div>
+                        <div class="espe-result-value">@FormatearNumero(resultadoNumerico.Value)</div>
+                        <div class="espe-result-caption">
+                            @FormatearNumero(peticion.Valor) @Abreviatura(peticion.UnidadOrigen)
+                            <span class="espe-arrow">→</span>
+                            @Abreviatura(peticion.UnidadDestino)
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="espe-result-placeholder">Listo para convertir</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Historial en tarjetas ===== -->
+        <div class="col-md-6">
+            <div class="espe-card p-4 h-100 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 text-secondary fw-bold">Historial de conversiones</h6>
+                    @if (historial.Count > 0)
+                    {
+                        <span class="espe-badge">@historial.Count</span>
+                    }
+                </div>
+
+                @if (historial.Count == 0)
+                {
+                    <div class="espe-history-empty">
+                        Aún no hay conversiones.<br />Tus resultados aparecerán aquí.
+                    </div>
+                }
+                else
+                {
+                    <div class="espe-history">
+                        @foreach (var item in historial)
+                        {
+                            <div class="espe-history-item">
+                                <div class="espe-history-title">
+                                    <span>@item.Origen</span>
+                                    <span class="espe-arrow">→</span>
+                                    <span>@item.Destino</span>
+                                </div>
+                                <div class="espe-history-meta">
+                                    <span class="espe-history-time">🕒 @item.Hora</span>
+                                    <span class="espe-history-tag">@item.Fuente</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Modal de diagnóstico (token / entorno para desarrolladores) ===== -->
+@if (diagnosticoAbierto)
+{
+    <div class="espe-modal-backdrop" @onclick="CerrarDiagnostico">
+        <div class="espe-modal" @onclick:stopPropagation="true">
+            <div class="espe-modal-header">
+                <h5 class="mb-0">Diagnóstico de conexión</h5>
+                <button type="button" class="espe-modal-close" @onclick="CerrarDiagnostico">✕</button>
+            </div>
+            <div class="espe-modal-body">
+                <div class="espe-meta-row">
+                    <span class="espe-meta-key">Entorno</span>
+                    <span class="espe-meta-value">@EstadoApp.BackendActual</span>
+                </div>
+                <div class="espe-meta-row">
+                    <span class="espe-meta-key">Token</span>
+                    <span class="espe-meta-value espe-meta-value--token">@TokenParaDiagnostico</span>
+                </div>
+            </div>
+            <div class="espe-modal-footer">
+                <button class="btn espe-btn-ghost" @onclick="CerrarDiagnostico">Cerrar</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private TipoMagnitud magnitudSeleccionada = TipoMagnitud.Longitud;
+    private PeticionConversion peticion = new PeticionConversion();
+
+    private double? resultadoNumerico = null;
+    private string mensajeError = "";
+
+    private readonly List<RegistroHistorial> historial = new();
+
+    private bool menuPerfilAbierto = false;
+    private bool diagnosticoAbierto = false;
+
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrEmpty(EstadoApp.TokenActual))
+        {
+            NavManager.NavigateTo("/");
+            return;
+        }
+
+        EstablecerUnidadesPorDefecto(TipoMagnitud.Longitud);
+    }
+
+    // 1. Lógica dinámica para renderizar los <option> según la magnitud elegida
+    private RenderFragment RenderizarOpcionesUnidad() => builder =>
+    {
+        int seq = 0;
+        Array valoresEnum = magnitudSeleccionada switch
+        {
+            TipoMagnitud.Masa => Enum.GetValues(typeof(UnidadMasa)),
+            TipoMagnitud.Temperatura => Enum.GetValues(typeof(UnidadTemperatura)),
+            _ => Enum.GetValues(typeof(UnidadLongitud))
+        };
+
+        foreach (var val in valoresEnum)
+        {
+            builder.OpenElement(seq++, "option");
+            builder.AddAttribute(seq++, "value", val.ToString());
+            builder.AddContent(seq++, val.ToString());
+            builder.CloseElement();
+        }
+    };
+
+    // 2. Evento al cambiar el combo superior
+    private void OnMagnitudChanged(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<TipoMagnitud>(e.Value?.ToString(), out var nuevaMagnitud))
+        {
+            magnitudSeleccionada = nuevaMagnitud;
+            EstablecerUnidadesPorDefecto(nuevaMagnitud);
+            resultadoNumerico = null;
+            mensajeError = "";
+        }
+    }
+
+    private void EstablecerUnidadesPorDefecto(TipoMagnitud magnitud)
+    {
+        peticion.TipoConversion = magnitud.ToString();
+        peticion.UnidadOrigen = magnitud switch
+        {
+            TipoMagnitud.Masa => UnidadMasa.GRAMO.ToString(),
+            TipoMagnitud.Temperatura => UnidadTemperatura.CELSIUS.ToString(),
+            _ => UnidadLongitud.METRO.ToString()
+        };
+        peticion.UnidadDestino = magnitud switch
+        {
+            TipoMagnitud.Masa => UnidadMasa.KILOGRAMO.ToString(),
+            TipoMagnitud.Temperatura => UnidadTemperatura.FAHRENHEIT.ToString(),
+            _ => UnidadLongitud.MILIMETRO.ToString()
+        };
+    }
+
+    // Revertir unidades con un solo toque
+    private void IntercambiarUnidades()
+    {
+        (peticion.UnidadOrigen, peticion.UnidadDestino) = (peticion.UnidadDestino, peticion.UnidadOrigen);
+        resultadoNumerico = null;
+        mensajeError = "";
+    }
+
+    // 3. LA CONEXIÓN A LOS ADAPTADORES
+    private async Task EjecutarConversion()
+    {
+        mensajeError = "";
+
+        try
+        {
+            var adaptador = Fabrica.ObtenerAdaptadorConversion(EstadoApp.BackendActual);
+            double resultadoNum = await adaptador.ConvertirAsync(peticion, EstadoApp.TokenActual);
+
+            resultadoNumerico = resultadoNum;
+
+            // Agregamos la tarjeta al historial (más reciente primero)
+            historial.Insert(0, new RegistroHistorial(
+                Origen: $"{FormatearNumero(peticion.Valor)} {Abreviatura(peticion.UnidadOrigen)}",
+                Destino: $"{FormatearNumero(resultadoNum)} {Abreviatura(peticion.UnidadDestino)}",
+                Hora: DateTime.Now.ToString("HH:mm:ss"),
+                Fuente: EstadoApp.BackendActual.ToString()));
+        }
+        catch (Exception ex)
+        {
+            resultadoNumerico = null;
+            mensajeError = TraductorErrores.MensajeAmigable(ex, EstadoApp.BackendActual);
+        }
+    }
+
+    private void Limpiar()
+    {
+        peticion.Valor = 0;
+        resultadoNumerico = null;
+        mensajeError = "";
+    }
+
+    // ===== Perfil / sesión =====
+    private void ToggleMenuPerfil() => menuPerfilAbierto = !menuPerfilAbierto;
+    private void CerrarMenuPerfil() => menuPerfilAbierto = false;
+
+    private void IrAPerfil()
+    {
+        menuPerfilAbierto = false;
+        NavManager.NavigateTo("/cambiar-contrasenia");
+    }
+
+    private void AbrirDiagnostico()
+    {
+        menuPerfilAbierto = false;
+        diagnosticoAbierto = true;
+    }
+
+    private void CerrarDiagnostico() => diagnosticoAbierto = false;
+
+    private void CerrarSesion()
+    {
+        menuPerfilAbierto = false;
+        EstadoApp.TokenActual = string.Empty;
+        NavManager.NavigateTo("/");
+    }
+
+    // ===== Helpers =====
+    private static string FormatearNumero(double valor) =>
+        valor.ToString("#,##0.##########", CultureInfo.InvariantCulture);
+
+    private static string Abreviatura(string unidad) => unidad switch
+    {
+        "MILIMETRO" => "mm",
+        "CENTIMETRO" => "cm",
+        "METRO" => "m",
+        "KILOMETRO" => "km",
+        "YARDA" => "yd",
+        "MILIGRAMO" => "mg",
+        "GRAMO" => "g",
+        "KILOGRAMO" => "kg",
+        "TONELADA" => "t",
+        "ONZA" => "oz",
+        "CELSIUS" => "°C",
+        "FAHRENHEIT" => "°F",
+        "KELVIN" => "K",
+        "RANKINE" => "°R",
+        _ => unidad
+    };
+
+    private string TokenParaDiagnostico =>
+        string.IsNullOrEmpty(EstadoApp.TokenActual) ? "(sin token)" : EstadoApp.TokenActual;
+
+    private sealed record RegistroHistorial(string Origen, string Destino, string Hora, string Fuente);
+}

@@ -1,0 +1,5 @@
+1. Para el Servicio WCF del Banco (BANQUITO_CORE):
+Server=.\SQLEXPRESS;Database=BANQUITO_CORE;User Id=Monster;Password=Monster9;TrustServerCertificate=True;
+
+2. Para la Comercializadora / App MAUI (COMERCIALIZADORA_DB):
+Server=.\SQLEXPRESS;Database=COMERCIALIZADORA_DB;User Id=Monster;Password=Monster9;TrustServerCertificate=True;

@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by XML-WS Runtime (https://github.com/eclipse-ee4j/metro-jax-ws). Runtime's version is Eclipse Metro/4.0.4.payara-p1 (FISH-10142-Metro-4.0.4-fa01c0b; 2025-07-11T17:44:37+0100) XMLWS-Impl/4.0.3 XMLWS-API/4.0.2 XMLB-Impl/4.0.5 XMLB-API/4.0.2 git-revision#fa01c0b. --><xs:schema xmlns:tns="http://ws.monster.edu.ec/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://ws.monster.edu.ec/">
+
+<xs:element name="GetDatosCuentaResult" type="tns:datosCuenta"/>
+
+<xs:element name="MovimientoData" type="tns:movimientoData"/>
+
+<xs:element name="iniciarSesion" type="tns:iniciarSesion"/>
+
+<xs:element name="iniciarSesionResponse" type="tns:iniciarSesionResponse"/>
+
+<xs:element name="regMovimiento" type="tns:regMovimiento"/>
+
+<xs:element name="regMovimientoResponse" type="tns:regMovimientoResponse"/>
+
+<xs:element name="resultado" type="tns:resultadoOperacion"/>
+
+<xs:element name="tipoMovimientosPermitidos" type="tns:tipoMovimientosPermitidos"/>
+
+<xs:element name="tipoMovimientosPermitidosResponse" type="tns:tipoMovimientosPermitidosResponse"/>
+
+<xs:element name="traerCuentasConClientes" type="tns:traerCuentasConClientes"/>
+
+<xs:element name="traerCuentasConClientesResponse" type="tns:traerCuentasConClientesResponse"/>
+
+<xs:element name="traerMovimientos" type="tns:traerMovimientos"/>
+
+<xs:element name="traerMovimientosResponse" type="tns:traerMovimientosResponse"/>
+
+<xs:complexType name="iniciarSesion">
+<xs:sequence>
+<xs:element name="usuario" type="xs:string" minOccurs="0"/>
+<xs:element name="contrasena" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="iniciarSesionResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="traerMovimientos">
+<xs:sequence>
+<xs:element name="cuenta" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="traerMovimientosResponse">
+<xs:sequence>
+<xs:element name="MovimientoData" type="tns:movimientoData" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="movimientoData">
+<xs:sequence>
+<xs:element name="CodigoCuenta" type="xs:string" minOccurs="0"/>
+<xs:element name="Numero" type="xs:int"/>
+<xs:element name="Fecha" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="Tipo" type="xs:string" minOccurs="0"/>
+<xs:element name="Importe" type="xs:decimal" minOccurs="0"/>
+<xs:element name="Referencia" type="xs:string" minOccurs="0"/>
+<xs:element name="SaldoActual" type="xs:decimal" minOccurs="0"/>
+<xs:element name="NombreCliente" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="regMovimiento">
+<xs:sequence>
+<xs:element name="cuentaOrigen" type="xs:string" minOccurs="0"/>
+<xs:element name="cuentaDestino" type="xs:string" minOccurs="0"/>
+<xs:element name="tipo" type="xs:string" minOccurs="0"/>
+<xs:element name="importe" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="regMovimientoResponse">
+<xs:sequence>
+<xs:element name="resultado" type="tns:resultadoOperacion" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="resultadoOperacion">
+<xs:sequence>
+<xs:element name="codigo" type="xs:int"/>
+<xs:element name="mensaje" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="tipoMovimientosPermitidos">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="tipoMovimientosPermitidosResponse">
+<xs:sequence>
+<xs:element name="tipoMovimiento" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="traerCuentasConClientes">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="traerCuentasConClientesResponse">
+<xs:sequence>
+<xs:element name="GetDatosCuentasResult" type="tns:datosCuenta" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="datosCuenta">
+<xs:sequence>
+<xs:element name="Codigo" type="xs:string" minOccurs="0"/>
+<xs:element name="EmailCliente" type="xs:string" minOccurs="0"/>
+<xs:element name="Estado" type="xs:string" minOccurs="0"/>
+<xs:element name="Moneda" type="xs:string" minOccurs="0"/>
+<xs:element name="NombreCliente" type="xs:string" minOccurs="0"/>
+<xs:element name="Saldo" type="xs:decimal" minOccurs="0"/>
+<xs:element name="TelefonoCliente" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

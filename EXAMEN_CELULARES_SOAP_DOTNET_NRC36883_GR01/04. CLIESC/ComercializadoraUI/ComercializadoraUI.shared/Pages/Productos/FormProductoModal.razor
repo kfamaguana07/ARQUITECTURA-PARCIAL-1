@@ -1,0 +1,121 @@
+﻿@using System.Threading.Tasks
+@using Microsoft.AspNetCore.Components.Forms
+@using ComercializadoraUI.shared.Models
+
+@if (Mostrar)
+{
+    <div class="modal fade show d-block modal-custom-backdrop" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-responsive">
+            <div class="modal-content modal-content-custom shadow-lg">
+
+                <!-- Header con degradado -->
+                <div class="modal-header modal-header-custom align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="modal-header-icon">
+                            <i class="bi @(EsEdicion ? "bi-pencil-square" : "bi-plus-circle-fill")"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title mb-0 fw-bold">
+                                @(EsEdicion ? "Editar Producto" : "Nuevo Celular")
+                            </h5>
+                            <small class="opacity-75 d-block">
+                                @(EsEdicion ? "Modifica los datos del producto" : "Registra un nuevo teléfono en el catálogo")
+                            </small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white ms-auto shadow-none" @onclick="Cancelar" aria-label="Close"></button>
+                </div>
+
+                <EditForm Model="ProductoModelo" OnValidSubmit="Guardar">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body p-3 p-md-4">
+
+                        <!-- Nombre -->
+                        <div class="form-group-custom mb-3 mb-md-4">
+                            <label class="form-label-custom">
+                                <i class="bi bi-phone me-1"></i> Nombre / Modelo
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light"><i class="bi bi-tag"></i></span>
+                                <InputText class="form-control"
+                                           @bind-Value="ProductoModelo.ProNombre"
+                                           placeholder="Ej: Samsung Galaxy S24" />
+                            </div>
+                            <ValidationMessage For="@(() => ProductoModelo.ProNombre)" class="text-danger small d-block mt-1" />
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="form-group-custom mb-3 mb-md-4">
+                            <label class="form-label-custom">
+                                <i class="bi bi-card-text me-1"></i> Descripción / Especificaciones
+                            </label>
+                            <InputTextArea class="form-control form-control-custom"
+                                           rows="3"
+                                           @bind-Value="ProductoModelo.ProDescripcion"
+                                           placeholder="Ej: 256GB SSD, 12GB RAM, OLED 120Hz" />
+                            <ValidationMessage For="@(() => ProductoModelo.ProDescripcion)" class="text-danger small d-block mt-1" />
+                        </div>
+
+                        <!-- Precio -->
+                        <div class="form-group-custom mb-2">
+                            <label class="form-label-custom">
+                                <i class="bi bi-currency-dollar me-1"></i> Precio (USD)
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light fw-bold text-success">$</span>
+                                <InputNumber class="form-control"
+                                             @bind-Value="ProductoModelo.ProPrecio"
+                                             step="0.01"
+                                             placeholder="0.00" />
+                            </div>
+                            <ValidationMessage For="@(() => ProductoModelo.ProPrecio)" class="text-danger small d-block mt-1" />
+                        </div>
+                    </div>
+
+                    <!-- Footer con apilado inteligente en móvil -->
+                    <div class="modal-footer modal-footer-custom flex-column-reverse flex-sm-row">
+                        <button type="button" class="btn btn-cancel w-100 w-sm-auto" @onclick="Cancelar">
+                            <i class="bi bi-x-lg me-1"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-submit-modal w-100 w-sm-auto mb-2 mb-sm-0">
+                            <i class="bi bi-check-lg me-1"></i>
+                            @(EsEdicion ? "Actualizar Producto" : "Guardar Producto")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool Mostrar { get; set; }
+
+    [Parameter]
+    public bool EsEdicion { get; set; }
+
+    [Parameter]
+    public ProductoViewModel Model { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnCerrar { get; set; }
+
+    private ProductoViewModel ProductoModelo => Model ?? new ProductoViewModel();
+
+    private async Task Guardar()
+    {
+        if (OnCerrar.HasDelegate)
+        {
+            await OnCerrar.InvokeAsync(true);
+        }
+    }
+
+    private async Task Cancelar()
+    {
+        if (OnCerrar.HasDelegate)
+        {
+            await OnCerrar.InvokeAsync(false);
+        }
+    }
+}

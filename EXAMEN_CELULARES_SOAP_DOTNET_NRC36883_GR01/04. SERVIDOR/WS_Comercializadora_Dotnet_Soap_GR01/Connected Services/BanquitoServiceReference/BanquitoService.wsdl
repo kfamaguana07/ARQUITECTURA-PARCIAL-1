@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://tempuri.org/" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" name="BanquitoService" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://tempuri.org/Imports">
+      <xsd:import schemaLocation="http://localhost:9091/Services/BanquitoService.svc?xsd=xsd0" namespace="http://tempuri.org/" />
+      <xsd:import schemaLocation="http://localhost:9091/Services/BanquitoService.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost:9091/Services/BanquitoService.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/WS_Banquito_Dotnet_Soap_GR01.Models" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="IBanquitoService_ValidarSujetoCredito_InputMessage">
+    <wsdl:part name="parameters" element="tns:ValidarSujetoCredito" />
+  </wsdl:message>
+  <wsdl:message name="IBanquitoService_ValidarSujetoCredito_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ValidarSujetoCreditoResponse" />
+  </wsdl:message>
+  <wsdl:message name="IBanquitoService_ObtenerMontoMaximo_InputMessage">
+    <wsdl:part name="parameters" element="tns:ObtenerMontoMaximo" />
+  </wsdl:message>
+  <wsdl:message name="IBanquitoService_ObtenerMontoMaximo_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ObtenerMontoMaximoResponse" />
+  </wsdl:message>
+  <wsdl:message name="IBanquitoService_OtorgarCredito_InputMessage">
+    <wsdl:part name="parameters" element="tns:OtorgarCredito" />
+  </wsdl:message>
+  <wsdl:message name="IBanquitoService_OtorgarCredito_OutputMessage">
+    <wsdl:part name="parameters" element="tns:OtorgarCreditoResponse" />
+  </wsdl:message>
+  <wsdl:message name="IBanquitoService_ConsultarTablaAmortizacion_InputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarTablaAmortizacion" />
+  </wsdl:message>
+  <wsdl:message name="IBanquitoService_ConsultarTablaAmortizacion_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarTablaAmortizacionResponse" />
+  </wsdl:message>
+  <wsdl:portType name="IBanquitoService">
+    <wsdl:operation name="ValidarSujetoCredito">
+      <wsdl:input wsaw:Action="http://tempuri.org/IBanquitoService/ValidarSujetoCredito" message="tns:IBanquitoService_ValidarSujetoCredito_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IBanquitoService/ValidarSujetoCreditoResponse" message="tns:IBanquitoService_ValidarSujetoCredito_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerMontoMaximo">
+      <wsdl:input wsaw:Action="http://tempuri.org/IBanquitoService/ObtenerMontoMaximo" message="tns:IBanquitoService_ObtenerMontoMaximo_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IBanquitoService/ObtenerMontoMaximoResponse" message="tns:IBanquitoService_ObtenerMontoMaximo_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="OtorgarCredito">
+      <wsdl:input wsaw:Action="http://tempuri.org/IBanquitoService/OtorgarCredito" message="tns:IBanquitoService_OtorgarCredito_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IBanquitoService/OtorgarCreditoResponse" message="tns:IBanquitoService_OtorgarCredito_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarTablaAmortizacion">
+      <wsdl:input wsaw:Action="http://tempuri.org/IBanquitoService/ConsultarTablaAmortizacion" message="tns:IBanquitoService_ConsultarTablaAmortizacion_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IBanquitoService/ConsultarTablaAmortizacionResponse" message="tns:IBanquitoService_ConsultarTablaAmortizacion_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicHttpBinding_IBanquitoService" type="tns:IBanquitoService">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ValidarSujetoCredito">
+      <soap:operation soapAction="http://tempuri.org/IBanquitoService/ValidarSujetoCredito" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerMontoMaximo">
+      <soap:operation soapAction="http://tempuri.org/IBanquitoService/ObtenerMontoMaximo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="OtorgarCredito">
+      <soap:operation soapAction="http://tempuri.org/IBanquitoService/OtorgarCredito" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarTablaAmortizacion">
+      <soap:operation soapAction="http://tempuri.org/IBanquitoService/ConsultarTablaAmortizacion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="BanquitoService">
+    <wsdl:port name="BasicHttpBinding_IBanquitoService" binding="tns:BasicHttpBinding_IBanquitoService">
+      <soap:address location="http://localhost:9091/Services/BanquitoService.svc" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

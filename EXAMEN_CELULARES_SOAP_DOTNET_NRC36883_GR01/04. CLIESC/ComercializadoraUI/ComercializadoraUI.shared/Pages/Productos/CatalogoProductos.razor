@@ -1,0 +1,276 @@
+﻿@page "/productos"
+@using ComercializadoraServiceReference
+@inject IProductoService ProductoService
+
+<div class="productos-wrapper">
+    <!-- Header adaptativo -->
+    <div class="productos-header mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="d-flex align-items-center">
+                <div class="header-icon">
+                    <i class="bi bi-phone-fill"></i>
+                </div>
+                <div>
+                    <h2 class="mb-0 fw-bold header-title">Catálogo de Teléfonos</h2>
+                    <p class="mb-0 opacity-75 small">Gestión de productos del catálogo comercial</p>
+                </div>
+            </div>
+            <button class="btn btn-light btn-nuevo shadow-sm w-100 w-sm-auto mt-2 mt-sm-0" @onclick="AbrirModalNuevo">
+                <i class="bi bi-plus-circle-fill me-2"></i>Registrar Celular
+            </button>
+        </div>
+    </div>
+
+    <AlertaResultado Mensaje="@mensajeAlerta" EsError="@esErrorAlerta" OnCerrar="LimpiarAlerta" />
+
+    @if (cargando)
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+                <p class="text-muted mb-0">Cargando catálogo desde WCF...</p>
+            </div>
+        </div>
+    }
+    else if (listaProductos == null || !listaProductos.Any())
+    {
+        <div class="card border-0 shadow-sm placeholder-card">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-5">
+                <i class="bi bi-phone display-1 text-muted opacity-50 mb-3"></i>
+                <h5 class="text-muted">No hay productos registrados</h5>
+                <p class="text-muted small mb-3">Comienza agregando tu primer teléfono al catálogo.</p>
+                <button class="btn btn-primary btn-submit" @onclick="AbrirModalNuevo">
+                    <i class="bi bi-plus-circle me-2"></i>Registrar Celular
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm card-productos">
+            <!-- Header de tarjeta -->
+            <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-grid-3x3-gap-fill me-2 text-primary"></i>
+                    <h5 class="mb-0 fw-semibold fs-6 fs-md-5">Productos disponibles</h5>
+                </div>
+                <span class="badge bg-primary rounded-pill">@listaProductos.Count registrados</span>
+            </div>
+
+            <!-- VISTA DE ESCRITORIO (Tabla - d-none d-md-block) -->
+            <div class="card-body p-0 table-responsive d-none d-md-block">
+                <table class="table table-hover align-middle mb-0 table-productos">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">ID</th>
+                            <th>Modelo / Nombre</th>
+                            <th>Descripción</th>
+                            <th class="text-end">Precio</th>
+                            <th class="text-center pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var prod in listaProductos)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="badge bg-light text-dark border fw-semibold">#@prod.ProId</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="product-avatar me-2">
+                                            <i class="bi bi-phone"></i>
+                                        </div>
+                                        <span class="fw-semibold">@prod.ProNombre</span>
+                                    </div>
+                                </td>
+                                <td class="text-muted small">@prod.ProDescripcion</td>
+                                <td class="text-end">
+                                    <span class="price-badge">$@prod.ProPrecio.ToString("N2")</span>
+                                </td>
+                                <td class="text-center pe-4">
+                                    <button class="btn btn-sm btn-action btn-action-edit me-1"
+                                            @onclick="() => AbrirModalEditar(prod)"
+                                            title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-action btn-action-delete"
+                                            @onclick="() => EliminarProducto(prod.ProId)"
+                                            title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- VISTA MÓVIL (Tarjetas Táctiles - d-block d-md-none) -->
+            <div class="card-body p-3 d-block d-md-none bg-light-subtle">
+                <div class="row g-3">
+                    @foreach (var prod in listaProductos)
+                    {
+                        <div class="col-12">
+                            <div class="card border border-slate-200 shadow-xs product-mobile-card">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="d-flex align-items-center me-2">
+                                            <div class="product-avatar me-2">
+                                                <i class="bi bi-phone"></i>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-light text-secondary border fw-normal me-1">#@prod.ProId</span>
+                                                <h6 class="mb-0 fw-bold text-dark d-inline-block">@prod.ProNombre</h6>
+                                            </div>
+                                        </div>
+                                        <span class="price-badge">$@prod.ProPrecio.ToString("N2")</span>
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(prod.ProDescripcion))
+                                    {
+                                        <p class="text-muted small mb-3 text-break">@prod.ProDescripcion</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted small fst-italic mb-3">Sin descripción registrada.</p>
+                                    }
+
+                                    <!-- Acciones en móvil con toque cómodo -->
+                                    <div class="d-flex gap-2 border-top pt-2 mt-2">
+                                        <button class="btn btn-sm btn-outline-primary flex-fill py-2 fw-medium"
+                                                @onclick="() => AbrirModalEditar(prod)">
+                                            <i class="bi bi-pencil me-1"></i> Editar
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger flex-fill py-2 fw-medium"
+                                                @onclick="() => EliminarProducto(prod.ProId)">
+                                            <i class="bi bi-trash me-1"></i> Eliminar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<FormProductoModal Mostrar="@mostrarModal"
+                   EsEdicion="@esEdicion"
+                   Model="@productoModel"
+                   OnCerrar="ProcesarGuardadoModal" />
+
+@code {
+    private List<Producto> listaProductos = new List<Producto>();
+    private bool cargando = true;
+    private bool mostrarModal = false;
+    private bool esEdicion = false;
+    private ProductoViewModel productoModel = new ProductoViewModel();
+
+    private string mensajeAlerta = string.Empty;
+    private bool esErrorAlerta = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarCatalogo();
+    }
+
+    private async Task CargarCatalogo()
+    {
+        cargando = true;
+        try
+        {
+            listaProductos = await ProductoService.ObtenerCatalogoAsync();
+        }
+        catch (Exception ex)
+        {
+            MostrarError("Error de conexión WCF: " + ex.Message);
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void AbrirModalNuevo()
+    {
+        esEdicion = false;
+        productoModel = new ProductoViewModel();
+        mostrarModal = true;
+    }
+
+    private void AbrirModalEditar(Producto prod)
+    {
+        esEdicion = true;
+        productoModel = new ProductoViewModel
+        {
+            ProId = prod.ProId,
+            ProNombre = prod.ProNombre,
+            ProDescripcion = prod.ProDescripcion,
+            ProPrecio = prod.ProPrecio
+        };
+        mostrarModal = true;
+    }
+
+    private async Task ProcesarGuardadoModal(bool confirmado)
+    {
+        mostrarModal = false;
+        if (!confirmado) return;
+
+        try
+        {
+            Producto prod = new Producto
+            {
+                ProId = productoModel.ProId,
+                ProNombre = productoModel.ProNombre,
+                ProDescripcion = productoModel.ProDescripcion,
+                ProPrecio = productoModel.ProPrecio
+            };
+
+            bool resultado = esEdicion
+                ? await ProductoService.ActualizarProductoAsync(prod)
+                : await ProductoService.GuardarProductoAsync(prod);
+
+            if (resultado)
+            {
+                MostrarExito(esEdicion ? "Producto actualizado con éxito." : "Producto guardado con éxito.");
+                await CargarCatalogo();
+            }
+            else
+            {
+                MostrarError("No se pudo procesar la operación en el servidor WCF.");
+            }
+        }
+        catch (Exception ex)
+        {
+            MostrarError("Error: " + ex.Message);
+        }
+    }
+
+    private async Task EliminarProducto(int id)
+    {
+        try
+        {
+            bool eliminado = await ProductoService.EliminarProductoAsync(id);
+            if (eliminado)
+            {
+                MostrarExito("Producto eliminado correctamente.");
+                await CargarCatalogo();
+            }
+            else
+            {
+                MostrarError("No se pudo eliminar el producto seleccionado.");
+            }
+        }
+        catch (Exception ex)
+        {
+            MostrarError("Error WCF: " + ex.Message);
+        }
+    }
+
+    private void MostrarExito(string m) { mensajeAlerta = m; esErrorAlerta = false; }
+    private void MostrarError(string m) { mensajeAlerta = m; esErrorAlerta = true; }
+    private void LimpiarAlerta() { mensajeAlerta = string.Empty; }
+}

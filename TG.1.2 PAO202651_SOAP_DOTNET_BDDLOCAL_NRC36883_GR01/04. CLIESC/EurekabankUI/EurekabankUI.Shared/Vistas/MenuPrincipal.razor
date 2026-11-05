@@ -1,0 +1,63 @@
+﻿@page "/menu"
+@inject ec.edu.monster.Servicios.EstadoAplicacion EstadoApp
+@inject NavigationManager NavManager
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="espe-title mb-0">Eureka Bank</h2>
+            <small class="text-secondary">Bienvenido al Sistema Bancario</small>
+        </div>
+        <button class="btn btn-outline-danger" @onclick="CerrarSesion">
+            <i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión
+        </button>
+    </div>
+
+    <div class="row g-4">
+        <!-- Tarjeta 1: Cuentas -->
+        <div class="col-md-6">
+            <div class="espe-card p-4 text-center h-100 d-flex flex-column justify-content-between" style="cursor: pointer;" @onclick='() => NavManager.NavigateTo("/cuentas")'>
+                <div>
+                    <div class="display-4 text-primary mb-3">
+                        <i class="bi bi-bank"></i>
+                    </div>
+                    <h4>Mis Cuentas</h4>
+                    <p class="text-muted">Consulta el saldo y los movimientos de todas las cuentas activas.</p>
+                </div>
+                <button class="btn espe-btn-primary w-100 mt-3">
+                    <i class="bi bi-wallet2 me-1"></i> Ver Cuentas
+                </button>
+            </div>
+        </div>
+
+        <!-- Tarjeta 2: Operaciones -->
+        <div class="col-md-6">
+            <div class="espe-card p-4 text-center h-100 d-flex flex-column justify-content-between" style="cursor: pointer;" @onclick='() => NavManager.NavigateTo("/operaciones")'>
+                <div>
+                    <div class="display-4 text-success mb-3">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </div>
+                    <h4>Operaciones</h4>
+                    <p class="text-muted">Realiza depósitos, retiros o transferencias entre cuentas.</p>
+                </div>
+                <button class="btn espe-btn-primary w-100 mt-3">
+                    <i class="bi bi-cash-stack me-1"></i> Ir a Operaciones
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (EstadoApp.TokenActual != "OK")
+            NavManager.NavigateTo("/");
+    }
+
+    private void CerrarSesion()
+    {
+        EstadoApp.TokenActual = "";
+        NavManager.NavigateTo("/");
+    }
+}

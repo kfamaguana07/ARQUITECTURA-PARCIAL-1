@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/WS_Banquito_Dotnet_Soap_GR01.Models" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/WS_Banquito_Dotnet_Soap_GR01.Models" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="RespuestaValidacion">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="CodigoCliente" type="xs:int" />
+      <xs:element minOccurs="0" name="EsSujeto" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Mensaje" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RespuestaValidacion" nillable="true" type="tns:RespuestaValidacion" />
+  <xs:complexType name="ArrayOfCuotaAmortizacion">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="CuotaAmortizacion" nillable="true" type="tns:CuotaAmortizacion" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfCuotaAmortizacion" nillable="true" type="tns:ArrayOfCuotaAmortizacion" />
+  <xs:complexType name="CuotaAmortizacion">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="CapitalPagado" type="xs:decimal" />
+      <xs:element minOccurs="0" name="InteresPagado" type="xs:decimal" />
+      <xs:element minOccurs="0" name="NumCuota" type="xs:int" />
+      <xs:element minOccurs="0" name="SaldoRestante" type="xs:decimal" />
+      <xs:element minOccurs="0" name="ValorCuota" type="xs:decimal" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="CuotaAmortizacion" nillable="true" type="tns:CuotaAmortizacion" />
+</xs:schema>

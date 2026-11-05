@@ -1,0 +1,164 @@
+{
+	"info": {
+		"_postman_id": "eurekabank-collection-v1",
+		"name": "EurekaBank REST API",
+		"description": "Colección de pruebas para la API RESTful de EurekaBank (Jakarta REST + OpenAPI/Swagger)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/WS_Eurekabank_Java_Rest_GR01/api",
+			"type": "string",
+			"description": "URL base de la API REST"
+		},
+		{
+			"key": "cuentaDemo",
+			"value": "00100001",
+			"type": "string",
+			"description": "Cuenta bancaria para pruebas de consulta"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Autenticación (Login)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuario\": \"cromero\",\n  \"contrasena\": \"chicho\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/eurekabank/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"eurekabank",
+						"login"
+					]
+				},
+				"description": "Valida las credenciales de un empleado del banco."
+			},
+			"response": []
+		},
+		{
+			"name": "2. Listar Cuentas con Clientes",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/eurekabank/cuentas",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"eurekabank",
+						"cuentas"
+					]
+				},
+				"description": "Obtiene la lista de cuentas bancarias activas con la información de sus titulares."
+			},
+			"response": []
+		},
+		{
+			"name": "3. Consultar Movimientos",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/eurekabank/movimientos?cuenta={{cuentaDemo}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"eurekabank",
+						"movimientos"
+					],
+					"query": [
+						{
+							"key": "cuenta",
+							"value": "{{cuentaDemo}}",
+							"description": "Código de la cuenta a consultar (Opcional)"
+						}
+					]
+				},
+				"description": "Obtiene el historial de movimientos ordenados cronológicamente."
+			},
+			"response": []
+		},
+		{
+			"name": "4. Registrar Movimiento (Depósito / Retiro / Transferencia)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"cuentaOrigen\": \"00100001\",\n  \"cuentaDestino\": \"00100002\",\n  \"tipo\": \"TRANSFERENCIA\",\n  \"importe\": 50.00\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/eurekabank/movimientos",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"eurekabank",
+						"movimientos"
+					]
+				},
+				"description": "Ejecuta transacciones bancarias. Tipos aceptados: 'DEPOSITO', 'RETIRO', 'TRANSFERENCIA'."
+			},
+			"response": []
+		},
+		{
+			"name": "5. Obtener Tipos de Movimiento Permitidos",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/eurekabank/tipos",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"eurekabank",
+						"tipos"
+					]
+				},
+				"description": "Devuelve la lista de tipos de movimientos soportados por el sistema."
+			},
+			"response": []
+		}
+	]
+}

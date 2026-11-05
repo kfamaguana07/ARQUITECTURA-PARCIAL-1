@@ -1,0 +1,91 @@
+@page "/"
+@inject ec.edu.monster.Servicios.EstadoAplicacion EstadoApp
+@inject ec.edu.monster.Servicios.FabricaEstrategiaBackend Fabrica
+@inject NavigationManager NavManager
+
+<div class="espe-background">
+    <div class="espe-card espe-login-card">
+        <div class="row g-0">
+
+            <div class="col-md-6 espe-login-media">
+                <img src="/sullivan_computer.jpg" class="img-fluid" alt="Imagen Login" />
+            </div>
+
+            <div class="col-md-6 p-4 p-md-5 d-flex flex-column justify-content-center">
+                <div class="text-center mb-4">
+                    <h4 class="espe-title mb-0">Sistema de Conversión de Unidades</h4>
+                    <small class="text-secondary">GRUPO 1</small>
+                </div>
+
+                <!-- ===== Selección del entorno de conexión ===== -->
+                <div class="mb-4">
+                    <label class="espe-section-label">Entorno de conexión</label>
+                    <div class="espe-backend-grid">
+                        @foreach (var backend in Enum.GetValues<TipoBackend>())
+                        {
+                            var seleccionado = EstadoApp.BackendActual == backend;
+                            <button type="button"
+                                    class="espe-backend-option @(seleccionado ? "is-selected" : "")"
+                                    @onclick="() => EstadoApp.EstablecerBackend(backend)">
+                                <span class="espe-backend-indicator"></span>
+                                <span class="espe-backend-name">@NombreBackend(backend)</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Usuario</label>
+                    <input type="text" class="form-control espe-form-control" @bind="usuario" />
+                </div>
+
+                <div class="mb-4">
+                    <label>Contraseña</label>
+                    <input type="password" class="form-control espe-form-control" @bind="contrasenia" />
+                </div>
+
+                <button class="btn espe-btn-primary w-100" @onclick="HacerLogin">Iniciar sesión</button>
+
+                @if (!string.IsNullOrEmpty(mensajeErrorLogin))
+                {
+                    <div class="alert alert-danger mt-3 mb-0 p-2 text-center" style="font-size:.85rem;">@mensajeErrorLogin</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string usuario = "Monster";
+    private string contrasenia = "Monster9";
+    private string mensajeErrorLogin = "";
+
+    private async Task HacerLogin()
+    {
+        mensajeErrorLogin = "";
+        try
+        {
+            // patrón Strategy:
+            var adaptadorAuth = Fabrica.ObtenerAdaptadorAutenticacion(EstadoApp.BackendActual);
+            EstadoApp.TokenActual = await adaptadorAuth.IniciarSesionAsync(usuario, contrasenia);
+
+            if (!string.IsNullOrEmpty(EstadoApp.TokenActual))
+            {
+                NavManager.NavigateTo("/conversor");
+            }
+        }
+        catch (Exception ex)
+        {
+            mensajeErrorLogin = TraductorErrores.MensajeAmigable(ex, EstadoApp.BackendActual);
+        }
+    }
+
+    private static string NombreBackend(TipoBackend backend) => backend switch
+    {
+        TipoBackend.JavaSoap => "Java SOAP",
+        TipoBackend.JavaRest => "Java REST",
+        TipoBackend.DotNetSoap => ".NET SOAP",
+        TipoBackend.DotNetRest => ".NET REST",
+        _ => backend.ToString()
+    };
+}
