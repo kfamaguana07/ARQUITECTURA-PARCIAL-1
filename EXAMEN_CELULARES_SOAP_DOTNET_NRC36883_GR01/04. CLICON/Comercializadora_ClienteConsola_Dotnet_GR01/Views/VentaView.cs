@@ -1,4 +1,6 @@
 ﻿using ComercializadoraServiceReference;
+using System;
+using System.Collections.Generic;
 
 namespace Comercializadora_ClienteConsola_Dotnet_GR01.Views
 {
@@ -6,10 +8,33 @@ namespace Comercializadora_ClienteConsola_Dotnet_GR01.Views
     {
         public SolicitudVentaRequest CapturarSolicitudVenta()
         {
-            ConsoleHelper.MostrarTitulo("PROCESAR VENTA DE TELÉFONO CELULAR");
+            ConsoleHelper.MostrarTitulo("PROCESAR VENTA MULTIPRODUCTO");
 
             string cedula = ConsoleHelper.LeerTextoRequerido("Número de Cédula del Cliente");
-            int productoId = ConsoleHelper.LeerEntero("ID del Producto/Teléfono a Comprar", 1);
+
+            // Carrito de compras
+            List<DetalleVentaItemContract> items = new List<DetalleVentaItemContract>();
+            bool agregarMas = true;
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\n--- AGREGAR PRODUCTOS AL CARRITO ---");
+            Console.ResetColor();
+
+            while (agregarMas)
+            {
+                int productoId = ConsoleHelper.LeerEntero("ID del Producto a Comprar", 1);
+                int cantidad = ConsoleHelper.LeerEntero("Cantidad a Comprar", 1, 100);
+
+                items.Add(new DetalleVentaItemContract
+                {
+                    ProductoId = productoId,
+                    Cantidad = cantidad
+                });
+
+                Console.Write("\n¿Desea agregar otro producto al carrito? (S/N): ");
+                string resp = Console.ReadLine()?.Trim().ToUpper();
+                agregarMas = resp == "S";
+            }
 
             Console.WriteLine("\nModalidad de Pago:");
             Console.WriteLine("  [E] Efectivo (Aplica 42% de descuento directo)");
@@ -31,7 +56,7 @@ namespace Comercializadora_ClienteConsola_Dotnet_GR01.Views
             return new SolicitudVentaRequest
             {
                 CedulaCliente = cedula,
-                ProductoId = productoId,
+                Items = items, // Asignación directa como List<DetalleVentaItemContract>    
                 FormaPago = formaPago,
                 NumeroCuotas = cuotas
             };

@@ -142,15 +142,6 @@
     font-size: 0.75rem;
 }
 
-/* Product preview */
-.product-preview {
-    background: #f1f5f9;
-    padding: .5rem .8rem;
-    border-radius: 8px;
-    font-size: .85rem;
-    color: #334155;
-}
-
 /* Summary box */
 .summary-box {
     padding: 0.85rem 1.1rem;
@@ -207,6 +198,17 @@
     min-height: 200px;
 }
 
+.btn-action-delete {
+    color: #dc2626;
+    border: none;
+    background: transparent;
+    transition: color 0.15s;
+}
+
+    .btn-action-delete:hover {
+        color: #991b1b;
+    }
+
 /* ==========================================
    OPTIMIZACIONES ESPECÍFICAS PARA MÓVIL
    ========================================== */
@@ -230,7 +232,6 @@
         font-size: 1.2rem;
     }
 
-    /* Previene auto-zoom del navegador táctil en inputs */
     .form-control, .form-select, .input-group-text {
         font-size: 16px !important;
     }

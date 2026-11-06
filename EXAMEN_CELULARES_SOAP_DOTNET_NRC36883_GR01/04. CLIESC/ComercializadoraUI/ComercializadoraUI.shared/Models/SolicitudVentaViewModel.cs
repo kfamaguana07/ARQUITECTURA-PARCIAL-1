@@ -9,8 +9,6 @@ namespace ComercializadoraUI.shared.Models
         [RegularExpression("^[0-9]+$", ErrorMessage = "La cédula debe contener únicamente números.")]
         public string CedulaCliente { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Debe seleccionar un producto del catálogo.")]
-        [Range(1, int.MaxValue, ErrorMessage = "Seleccione un producto válido.")]
         public int ProductoId { get; set; }
 
         [Required(ErrorMessage = "Debe seleccionar una forma de pago.")]

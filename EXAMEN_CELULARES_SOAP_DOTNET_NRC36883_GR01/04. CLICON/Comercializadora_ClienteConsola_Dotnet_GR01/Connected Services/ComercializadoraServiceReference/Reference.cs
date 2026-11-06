@@ -91,9 +91,9 @@ namespace ComercializadoraServiceReference
         
         private string FormaPagoField;
         
-        private int NumeroCuotasField;
+        private System.Collections.Generic.List<ComercializadoraServiceReference.DetalleVentaItemContract> ItemsField;
         
-        private int ProductoIdField;
+        private int NumeroCuotasField;
         
         [System.Runtime.Serialization.DataMemberAttribute()]
         public string CedulaCliente
@@ -122,6 +122,19 @@ namespace ComercializadoraServiceReference
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
+        public System.Collections.Generic.List<ComercializadoraServiceReference.DetalleVentaItemContract> Items
+        {
+            get
+            {
+                return this.ItemsField;
+            }
+            set
+            {
+                this.ItemsField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
         public int NumeroCuotas
         {
             get
@@ -131,6 +144,31 @@ namespace ComercializadoraServiceReference
             set
             {
                 this.NumeroCuotasField = value;
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="DetalleVentaItemContract", Namespace="http://schemas.datacontract.org/2004/07/WS_Comercializadora_Dotnet_Soap_GR01.Mode" +
+        "ls")]
+    public partial class DetalleVentaItemContract : object
+    {
+        
+        private int CantidadField;
+        
+        private int ProductoIdField;
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int Cantidad
+        {
+            get
+            {
+                return this.CantidadField;
+            }
+            set
+            {
+                this.CantidadField = value;
             }
         }
         
@@ -163,7 +201,7 @@ namespace ComercializadoraServiceReference
         
         private string MensajeField;
         
-        private ComercializadoraServiceReference.CuotaAmortizacion[] TablaAmortizacionField;
+        private System.Collections.Generic.List<ComercializadoraServiceReference.CuotaAmortizacion> TablaAmortizacionField;
         
         private decimal TotalPagarField;
         
@@ -220,7 +258,7 @@ namespace ComercializadoraServiceReference
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public ComercializadoraServiceReference.CuotaAmortizacion[] TablaAmortizacion
+        public System.Collections.Generic.List<ComercializadoraServiceReference.CuotaAmortizacion> TablaAmortizacion
         {
             get
             {
@@ -328,16 +366,242 @@ namespace ComercializadoraServiceReference
         }
     }
     
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="FacturaConsultaContract", Namespace="http://schemas.datacontract.org/2004/07/WS_Comercializadora_Dotnet_Soap_GR01.Mode" +
+        "ls")]
+    public partial class FacturaConsultaContract : object
+    {
+        
+        private string CedulaClienteField;
+        
+        private System.Nullable<int> CreditoIdField;
+        
+        private decimal DescuentoField;
+        
+        private System.Collections.Generic.List<ComercializadoraServiceReference.DetalleFacturaConsultaContract> DetalleField;
+        
+        private int FacturaIdField;
+        
+        private System.DateTime FechaVentaField;
+        
+        private string FormaPagoField;
+        
+        private decimal SubtotalField;
+        
+        private decimal TotalField;
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string CedulaCliente
+        {
+            get
+            {
+                return this.CedulaClienteField;
+            }
+            set
+            {
+                this.CedulaClienteField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public System.Nullable<int> CreditoId
+        {
+            get
+            {
+                return this.CreditoIdField;
+            }
+            set
+            {
+                this.CreditoIdField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public decimal Descuento
+        {
+            get
+            {
+                return this.DescuentoField;
+            }
+            set
+            {
+                this.DescuentoField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public System.Collections.Generic.List<ComercializadoraServiceReference.DetalleFacturaConsultaContract> Detalle
+        {
+            get
+            {
+                return this.DetalleField;
+            }
+            set
+            {
+                this.DetalleField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int FacturaId
+        {
+            get
+            {
+                return this.FacturaIdField;
+            }
+            set
+            {
+                this.FacturaIdField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public System.DateTime FechaVenta
+        {
+            get
+            {
+                return this.FechaVentaField;
+            }
+            set
+            {
+                this.FechaVentaField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string FormaPago
+        {
+            get
+            {
+                return this.FormaPagoField;
+            }
+            set
+            {
+                this.FormaPagoField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public decimal Subtotal
+        {
+            get
+            {
+                return this.SubtotalField;
+            }
+            set
+            {
+                this.SubtotalField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public decimal Total
+        {
+            get
+            {
+                return this.TotalField;
+            }
+            set
+            {
+                this.TotalField = value;
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="DetalleFacturaConsultaContract", Namespace="http://schemas.datacontract.org/2004/07/WS_Comercializadora_Dotnet_Soap_GR01.Mode" +
+        "ls")]
+    public partial class DetalleFacturaConsultaContract : object
+    {
+        
+        private int CantidadField;
+        
+        private decimal PrecioUnitarioField;
+        
+        private int ProductoIdField;
+        
+        private string ProductoNombreField;
+        
+        private decimal SubtotalField;
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int Cantidad
+        {
+            get
+            {
+                return this.CantidadField;
+            }
+            set
+            {
+                this.CantidadField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public decimal PrecioUnitario
+        {
+            get
+            {
+                return this.PrecioUnitarioField;
+            }
+            set
+            {
+                this.PrecioUnitarioField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int ProductoId
+        {
+            get
+            {
+                return this.ProductoIdField;
+            }
+            set
+            {
+                this.ProductoIdField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ProductoNombre
+        {
+            get
+            {
+                return this.ProductoNombreField;
+            }
+            set
+            {
+                this.ProductoNombreField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public decimal Subtotal
+        {
+            get
+            {
+                return this.SubtotalField;
+            }
+            set
+            {
+                this.SubtotalField = value;
+            }
+        }
+    }
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="ComercializadoraServiceReference.IComercializadoraService")]
     public interface IComercializadoraService
     {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IComercializadoraService/ObtenerCatalogoProductos", ReplyAction="http://tempuri.org/IComercializadoraService/ObtenerCatalogoProductosResponse")]
-        ComercializadoraServiceReference.Producto[] ObtenerCatalogoProductos();
+        System.Collections.Generic.List<ComercializadoraServiceReference.Producto> ObtenerCatalogoProductos();
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IComercializadoraService/ObtenerCatalogoProductos", ReplyAction="http://tempuri.org/IComercializadoraService/ObtenerCatalogoProductosResponse")]
-        System.Threading.Tasks.Task<ComercializadoraServiceReference.Producto[]> ObtenerCatalogoProductosAsync();
+        System.Threading.Tasks.Task<System.Collections.Generic.List<ComercializadoraServiceReference.Producto>> ObtenerCatalogoProductosAsync();
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IComercializadoraService/GuardarProducto", ReplyAction="http://tempuri.org/IComercializadoraService/GuardarProductoResponse")]
         bool GuardarProducto(ComercializadoraServiceReference.Producto producto);
@@ -364,10 +628,16 @@ namespace ComercializadoraServiceReference
         System.Threading.Tasks.Task<ComercializadoraServiceReference.RespuestaVenta> ProcesarVentaAsync(ComercializadoraServiceReference.SolicitudVentaRequest solicitud);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IComercializadoraService/ConsultarAmortizacionCredito", ReplyAction="http://tempuri.org/IComercializadoraService/ConsultarAmortizacionCreditoResponse")]
-        ComercializadoraServiceReference.CuotaAmortizacion[] ConsultarAmortizacionCredito(int codigoCredito);
+        System.Collections.Generic.List<ComercializadoraServiceReference.CuotaAmortizacion> ConsultarAmortizacionCredito(int codigoCredito);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IComercializadoraService/ConsultarAmortizacionCredito", ReplyAction="http://tempuri.org/IComercializadoraService/ConsultarAmortizacionCreditoResponse")]
-        System.Threading.Tasks.Task<ComercializadoraServiceReference.CuotaAmortizacion[]> ConsultarAmortizacionCreditoAsync(int codigoCredito);
+        System.Threading.Tasks.Task<System.Collections.Generic.List<ComercializadoraServiceReference.CuotaAmortizacion>> ConsultarAmortizacionCreditoAsync(int codigoCredito);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IComercializadoraService/ObtenerHistorialFacturas", ReplyAction="http://tempuri.org/IComercializadoraService/ObtenerHistorialFacturasResponse")]
+        System.Collections.Generic.List<ComercializadoraServiceReference.FacturaConsultaContract> ObtenerHistorialFacturas(string cedulaCliente);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IComercializadoraService/ObtenerHistorialFacturas", ReplyAction="http://tempuri.org/IComercializadoraService/ObtenerHistorialFacturasResponse")]
+        System.Threading.Tasks.Task<System.Collections.Generic.List<ComercializadoraServiceReference.FacturaConsultaContract>> ObtenerHistorialFacturasAsync(string cedulaCliente);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
@@ -420,12 +690,12 @@ namespace ComercializadoraServiceReference
         {
         }
         
-        public ComercializadoraServiceReference.Producto[] ObtenerCatalogoProductos()
+        public System.Collections.Generic.List<ComercializadoraServiceReference.Producto> ObtenerCatalogoProductos()
         {
             return base.Channel.ObtenerCatalogoProductos();
         }
         
-        public System.Threading.Tasks.Task<ComercializadoraServiceReference.Producto[]> ObtenerCatalogoProductosAsync()
+        public System.Threading.Tasks.Task<System.Collections.Generic.List<ComercializadoraServiceReference.Producto>> ObtenerCatalogoProductosAsync()
         {
             return base.Channel.ObtenerCatalogoProductosAsync();
         }
@@ -470,14 +740,24 @@ namespace ComercializadoraServiceReference
             return base.Channel.ProcesarVentaAsync(solicitud);
         }
         
-        public ComercializadoraServiceReference.CuotaAmortizacion[] ConsultarAmortizacionCredito(int codigoCredito)
+        public System.Collections.Generic.List<ComercializadoraServiceReference.CuotaAmortizacion> ConsultarAmortizacionCredito(int codigoCredito)
         {
             return base.Channel.ConsultarAmortizacionCredito(codigoCredito);
         }
         
-        public System.Threading.Tasks.Task<ComercializadoraServiceReference.CuotaAmortizacion[]> ConsultarAmortizacionCreditoAsync(int codigoCredito)
+        public System.Threading.Tasks.Task<System.Collections.Generic.List<ComercializadoraServiceReference.CuotaAmortizacion>> ConsultarAmortizacionCreditoAsync(int codigoCredito)
         {
             return base.Channel.ConsultarAmortizacionCreditoAsync(codigoCredito);
+        }
+        
+        public System.Collections.Generic.List<ComercializadoraServiceReference.FacturaConsultaContract> ObtenerHistorialFacturas(string cedulaCliente)
+        {
+            return base.Channel.ObtenerHistorialFacturas(cedulaCliente);
+        }
+        
+        public System.Threading.Tasks.Task<System.Collections.Generic.List<ComercializadoraServiceReference.FacturaConsultaContract>> ObtenerHistorialFacturasAsync(string cedulaCliente)
+        {
+            return base.Channel.ObtenerHistorialFacturasAsync(cedulaCliente);
         }
         
         public virtual System.Threading.Tasks.Task OpenAsync()

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using WS_Comercializadora_Dotnet_Soap_GR01.BanquitoServiceReference;
 using WS_Comercializadora_Dotnet_Soap_GR01.BusinessLogic;
 using WS_Comercializadora_Dotnet_Soap_GR01.Contracts;
@@ -36,16 +36,16 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.Services
             return _productoBLL.Eliminar(productoId);
         }
 
-        // --- 2. Orquestación del Proceso de Venta ---
+        // --- 2. Orquestación del Proceso de Venta Multiproducto ---
 
         public RespuestaVenta ProcesarVenta(SolicitudVentaRequest solicitud)
         {
-            if (solicitud == null || string.IsNullOrWhiteSpace(solicitud.CedulaCliente) || solicitud.ProductoId <= 0)
+            if (solicitud == null || string.IsNullOrWhiteSpace(solicitud.CedulaCliente) || solicitud.Items == null || !solicitud.Items.Any())
             {
                 return new RespuestaVenta
                 {
                     Exitosa = false,
-                    Mensaje = "Los datos de la solicitud de venta son incompletos o no válidos."
+                    Mensaje = "La solicitud de venta debe contener una cédula de cliente y al menos un producto en el carrito."
                 };
             }
 
@@ -58,6 +58,13 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.Services
         {
             if (codigoCredito <= 0) return new List<CuotaAmortizacion>();
             return _ventaBLL.ConsultarAmortizacion(codigoCredito);
+        }
+
+        // --- 4. Consulta de Historial de Facturas desde la Comercializadora ---
+        public List<FacturaConsultaContract> ObtenerHistorialFacturas(string cedulaCliente)
+        {
+            VentaBLL ventaBLL = new VentaBLL();
+            return ventaBLL.ObtenerHistorialFacturas(cedulaCliente);
         }
     }
 }

@@ -8,12 +8,13 @@ namespace Comercializadora_ClienteConsola_Dotnet_GR01.Views
         {
             ConsoleHelper.MostrarTitulo("COMERCIALIZADORA DE TELÉFONOS CELULARES - MENÚ PRINCIPAL");
             Console.WriteLine("1. Mantenimiento del Catálogo de Productos (CRUD)");
-            Console.WriteLine("2. Procesar Venta de Teléfono (Efectivo / Crédito Directo)");
+            Console.WriteLine("2. Procesar Venta Multiproducto (Efectivo / Crédito Directo)");
             Console.WriteLine("3. Consultar Tabla de Amortización por Crédito");
+            Console.WriteLine("4. Consultar Historial de Facturas");
             Console.WriteLine("0. Salir del Sistema");
             Console.WriteLine("--------------------------------------------------------------------------------");
 
-            return ConsoleHelper.LeerEntero("Seleccione una opción", 0, 3);
+            return ConsoleHelper.LeerEntero("Seleccione una opción", 0, 4);
         }
 
         public int MostrarSubMenuProductos()

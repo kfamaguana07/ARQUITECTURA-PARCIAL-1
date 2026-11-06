@@ -1,37 +1,17 @@
 {
   "ExtendedData": {
     "inputs": [
-      "http://localhost:9092/Services/ComercializadoraService.svc?wsdl"
+      "http://localhost:9092/Services/ComercializadoraService.svc?wsdl."
     ],
     "collectionTypes": [
-      "System.Array",
-      "System.Collections.Generic.Dictionary`2"
+      "System.Collections.Generic.Dictionary`2",
+      "System.Collections.Generic.List`1"
     ],
     "namespaceMappings": [
       "*, ComercializadoraServiceReference"
     ],
-    "references": [
-      "Microsoft.AspNetCore.Authorization, {Microsoft.AspNetCore.Authorization, 10.0.12}",
-      "Microsoft.AspNetCore.Components, {Microsoft.AspNetCore.Components, 10.0.12}",
-      "Microsoft.AspNetCore.Components.Forms, {Microsoft.AspNetCore.Components.Forms, 10.0.12}",
-      "Microsoft.AspNetCore.Components.Web, {Microsoft.AspNetCore.Components.Web, 10.0.12}",
-      "Microsoft.AspNetCore.Metadata, {Microsoft.AspNetCore.Metadata, 10.0.12}",
-      "Microsoft.Extensions.Configuration, {Microsoft.Extensions.Configuration, 10.0.12}",
-      "Microsoft.Extensions.Configuration.Abstractions, {Microsoft.Extensions.Configuration.Abstractions, 10.0.12}",
-      "Microsoft.Extensions.Configuration.Binder, {Microsoft.Extensions.Configuration.Binder, 10.0.12}",
-      "Microsoft.Extensions.DependencyInjection, {Microsoft.Extensions.DependencyInjection, 10.0.12}",
-      "Microsoft.Extensions.DependencyInjection.Abstractions, {Microsoft.Extensions.DependencyInjection.Abstractions, 10.0.12}",
-      "Microsoft.Extensions.Diagnostics, {Microsoft.Extensions.Diagnostics, 10.0.12}",
-      "Microsoft.Extensions.Diagnostics.Abstractions, {Microsoft.Extensions.Diagnostics.Abstractions, 10.0.12}",
-      "Microsoft.Extensions.Logging.Abstractions, {Microsoft.Extensions.Logging.Abstractions, 10.0.12}",
-      "Microsoft.Extensions.Options, {Microsoft.Extensions.Options, 10.0.12}",
-      "Microsoft.Extensions.Options.ConfigurationExtensions, {Microsoft.Extensions.Options.ConfigurationExtensions, 10.0.12}",
-      "Microsoft.Extensions.Primitives, {Microsoft.Extensions.Primitives, 10.0.12}",
-      "Microsoft.Extensions.Validation, {Microsoft.Extensions.Validation, 10.0.12}",
-      "Microsoft.JSInterop, {Microsoft.JSInterop, 10.0.12}"
-    ],
     "sync": true,
     "targetFramework": "net10.0",
-    "typeReuseMode": "All"
+    "typeReuseMode": "None"
   }
 }

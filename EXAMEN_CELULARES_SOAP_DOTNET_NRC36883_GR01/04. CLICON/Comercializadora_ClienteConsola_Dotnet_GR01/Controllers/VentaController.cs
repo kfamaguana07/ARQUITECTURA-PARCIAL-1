@@ -23,8 +23,7 @@ namespace Comercializadora_ClienteConsola_Dotnet_GR01.Controllers
                     RespuestaVenta respuesta = client.ProcesarVenta(solicitud);
                     _ventaView.MostrarResultadoVenta(respuesta);
 
-                    // Si fue venta a crédito exitosa, renderizar directamente la amortización retornada
-                    if (respuesta.Exitosa && respuesta.TablaAmortizacion != null && respuesta.TablaAmortizacion.Length > 0)
+                    if (respuesta.Exitosa && respuesta.TablaAmortizacion != null && respuesta.TablaAmortizacion.Count > 0)
                     {
                         Console.WriteLine("\nDesplegando Tabla de Amortización aprobada por BanQuito...");
                         _amortizacionView.MostrarTablaAmortizacion(respuesta.TablaAmortizacion, respuesta.CreditoId ?? 0);

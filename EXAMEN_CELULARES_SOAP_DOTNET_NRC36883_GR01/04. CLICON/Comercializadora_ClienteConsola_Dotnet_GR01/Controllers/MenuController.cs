@@ -8,6 +8,7 @@ namespace Comercializadora_ClienteConsola_Dotnet_GR01.Controllers
         private readonly ProductoController _productoController = new ProductoController();
         private readonly VentaController _ventaController = new VentaController();
         private readonly AmortizacionController _amortizacionController = new AmortizacionController();
+        private readonly FacturaController _facturaController = new FacturaController();
 
         public void Iniciar()
         {
@@ -25,6 +26,9 @@ namespace Comercializadora_ClienteConsola_Dotnet_GR01.Controllers
                         break;
                     case 3:
                         _amortizacionController.ConsultarTabla();
+                        break;
+                    case 4:
+                        _facturaController.ConsultarHistorial();
                         break;
                     case 0:
                         salir = true;

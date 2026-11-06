@@ -8,7 +8,7 @@
 @inject IVentaService VentaService
 
 <div class="ventas-wrapper">
-    <!-- Header adaptativo con degradado -->
+    <!-- Header -->
     <div class="ventas-header mb-4">
         <div class="d-flex align-items-center">
             <div class="header-icon">
@@ -16,209 +16,492 @@
             </div>
             <div>
                 <h2 class="mb-0 fw-bold header-title">Facturación y Ventas</h2>
-                <p class="mb-0 opacity-75 small">Sistema de venta de teléfonos</p>
+                <p class="mb-0 opacity-75 small">
+                    Sistema de venta multiproducto y multicantidad
+                </p>
             </div>
         </div>
     </div>
 
-    <AlertaResultado Mensaje="@mensajeAlerta" EsError="@esErrorAlerta" OnCerrar="LimpiarAlerta" />
+    <AlertaResultado Mensaje="@mensajeAlerta"
+                     EsError="@esErrorAlerta"
+                     OnCerrar="LimpiarAlerta" />
 
     <div class="row g-3 g-md-4">
-        <!-- Columna del Formulario -->
-        <div class="col-lg-6">
+
+        <!-- Formulario y Carrito -->
+        <div class="col-lg-7">
             <div class="card border-0 shadow-sm h-100 card-form">
+
                 <div class="card-header card-header-custom">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-pencil-square me-2 fs-5 text-primary"></i>
-                        <h5 class="mb-0 fw-semibold fs-6 fs-md-5">Datos de la Venta</h5>
+                        <h5 class="mb-0 fw-semibold fs-6 fs-md-5">
+                            Datos de la Venta
+                        </h5>
                     </div>
                 </div>
+
                 <div class="card-body p-3 p-md-4">
-                    <EditForm Model="solicitudModel" OnValidSubmit="EjecutarVenta">
+
+                    <EditForm Model="solicitudModel"
+                              OnValidSubmit="EjecutarVenta"
+                              OnInvalidSubmit="ManejarSubmitInvalido">
+
                         <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger small mb-3" />
 
                         <!-- Paso 1: Cliente -->
                         <div class="form-step mb-3 mb-md-4">
+
                             <div class="step-indicator">
                                 <span class="step-badge">1</span>
-                                <span class="step-label">Identificación del Cliente</span>
+                                <span class="step-label">
+                                    Identificación del Cliente
+                                </span>
                             </div>
+
                             <div class="input-group input-group-lg">
-                                <span class="input-group-text bg-light"><i class="bi bi-person-vcard"></i></span>
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-person-vcard"></i>
+                                </span>
+
                                 <InputText class="form-control"
                                            @bind-Value="solicitudModel.CedulaCliente"
                                            placeholder="Ej: 1727578104" />
                             </div>
-                            <ValidationMessage For="@(() => solicitudModel.CedulaCliente)" class="text-danger small d-block mt-1" />
+
+                            <ValidationMessage
+                                For="@(() => solicitudModel.CedulaCliente)"
+                                class="text-danger small d-block mt-1" />
                         </div>
 
-                        <!-- Paso 2: Producto -->
+                        <!-- Paso 2: Productos -->
                         <div class="form-step mb-3 mb-md-4">
+
                             <div class="step-indicator">
                                 <span class="step-badge">2</span>
-                                <span class="step-label">Seleccionar Producto</span>
+                                <span class="step-label">
+                                    Agregar Productos al Carrito
+                                </span>
                             </div>
-                            <InputSelect class="form-select form-select-lg"
-                                         @bind-Value="solicitudModel.ProductoId"
-                                         @bind-Value:after="OnProductoCambiado">
-                                <option value="0">-- Seleccione un teléfono --</option>
-                                @foreach (var item in catalogo)
-                                {
-                                    <option value="@item.ProId">@item.ProNombre — $@item.ProPrecio.ToString("N2")</option>
-                                }
-                            </InputSelect>
-                            <ValidationMessage For="@(() => solicitudModel.ProductoId)" class="text-danger small d-block mt-1" />
 
-                            @if (precioSeleccionado > 0)
+                            <div class="row g-2 align-items-end mb-3">
+
+                                <div class="col-12 col-sm-6">
+                                    <label class="form-label-custom small">
+                                        Teléfono
+                                    </label>
+
+                                    <select class="form-select form-select-lg"
+                                            @bind="productoSeleccionadoId">
+
+                                        <option value="-1">
+                                            -- Seleccione un producto --
+                                        </option>
+
+                                        @foreach (var item in catalogo)
+                                        {
+                                            <option value="@item.ProId">
+                                                @item.ProNombre —
+                                                $@item.ProPrecio.ToString("N2")
+                                            </option>
+                                        }
+
+                                    </select>
+                                </div>
+
+                                <div class="col-6 col-sm-3">
+                                    <label class="form-label-custom small">
+                                        Cantidad
+                                    </label>
+
+                                    <input type="number"
+                                           class="form-control form-control-lg text-center"
+                                           @bind="cantidadAgregar"
+                                           min="1"
+                                           max="99" />
+                                </div>
+
+                                <div class="col-6 col-sm-3">
+                                    <button type="button"
+                                            class="btn btn-outline-primary btn-lg w-100 fw-semibold"
+                                            @onclick="AgregarAlCarrito">
+
+                                        <i class="bi bi-cart-plus me-1"></i>
+                                        Añadir
+                                    </button>
+                                </div>
+
+                            </div>
+
+                            <!-- Carrito -->
+                            @if (carrito.Any())
                             {
-                                <div class="product-preview mt-2">
-                                    <i class="bi bi-phone me-1"></i>
-                                    <strong>Precio base:</strong> $@precioSeleccionado.ToString("N2")
+                                <div class="card border border-slate-200 shadow-xs mb-3 overflow-hidden">
+
+                                    <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center">
+
+                                        <span class="fw-bold small text-dark">
+                                            <i class="bi bi-cart3 me-1 text-primary"></i>
+                                            Ítems en el Carrito
+                                        </span>
+
+                                        <span class="badge bg-primary rounded-pill">
+                                            @carrito.Sum(c => c.Cantidad) unidades
+                                        </span>
+
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0 small">
+
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="ps-3">Producto</th>
+                                                    <th class="text-center" style="width: 85px;">Cant.</th>
+                                                    <th class="text-end">Precio U.</th>
+                                                    <th class="text-end">Subtotal</th>
+                                                    <th class="text-center pe-3" style="width: 40px;"></th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                @foreach (var item in carrito)
+                                                {
+                                                    <tr>
+
+                                                        <td class="ps-3 fw-semibold text-dark">
+                                                            <i class="bi bi-phone me-1 text-muted"></i>
+                                                            @item.ProductoNombre
+                                                        </td>
+
+                                                        <td class="text-center">
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm text-center px-1"
+                                                                   value="@item.Cantidad"
+                                                                   @onchange="@(e => ModificarCantidad(item, e.Value?.ToString()))"
+                                                                   min="1" />
+                                                        </td>
+
+                                                        <td class="text-end">
+                                                            $@item.PrecioUnitario.ToString("N2")
+                                                        </td>
+
+                                                        <td class="text-end fw-bold text-primary">
+                                                            $@item.Subtotal.ToString("N2")
+                                                        </td>
+
+                                                        <td class="text-center pe-3">
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-action-delete p-1"
+                                                                    @onclick="() => EliminarItemCarrito(item)"
+                                                                    title="Quitar">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
+
+                                                    </tr>
+                                                }
+                                            </tbody>
+
+                                        </table>
+                                    </div>
                                 </div>
                             }
+                            else
+                            {
+                                <div class="alert alert-warning border-0 small py-2 px-3 rounded-3">
+                                    <i class="bi bi-exclamation-circle me-1"></i>
+                                    Agrega al menos un producto al carrito para continuar.
+                                </div>
+                            }
+
                         </div>
 
                         <!-- Paso 3: Forma de pago -->
                         <div class="form-step mb-3 mb-md-4">
+
                             <div class="step-indicator">
                                 <span class="step-badge">3</span>
                                 <span class="step-label">Forma de Pago</span>
                             </div>
 
                             <InputRadioGroup @bind-Value="solicitudModel.FormaPago">
+
                                 <div class="row g-2">
+
                                     <div class="col-6">
                                         <label class="payment-option @(solicitudModel.FormaPago == "E" ? "selected" : "")">
+
                                             <InputRadio Value='"E"' class="d-none" />
+
                                             <i class="bi bi-cash-coin fs-3 fs-md-4 d-block mb-1 text-success"></i>
-                                            <span class="fw-bold d-block option-title">Efectivo</span>
-                                            <small class="text-success fw-semibold option-subtitle">-42% descuento</small>
+
+                                            <span class="fw-bold d-block option-title">
+                                                Efectivo
+                                            </span>
+
+                                            <small class="text-success fw-semibold option-subtitle">
+                                                -42% descuento
+                                            </small>
+
                                         </label>
                                     </div>
+
                                     <div class="col-6">
                                         <label class="payment-option @(solicitudModel.FormaPago == "C" ? "selected" : "")">
+
                                             <InputRadio Value='"C"' class="d-none" />
+
                                             <i class="bi bi-credit-card fs-3 fs-md-4 d-block mb-1 text-primary"></i>
-                                            <span class="fw-bold d-block option-title">Crédito</span>
-                                            <small class="text-primary fw-semibold option-subtitle">BanQuito WCF</small>
+
+                                            <span class="fw-bold d-block option-title">
+                                                Crédito
+                                            </span>
+
+                                            <small class="text-primary fw-semibold option-subtitle">
+                                                BanQuito WCF
+                                            </small>
+
                                         </label>
                                     </div>
+
                                 </div>
+
                             </InputRadioGroup>
                         </div>
 
-                        <!-- Resumen dinámico -->
-                        @if (solicitudModel.FormaPago == "E" && precioSeleccionado > 0)
+                        <!-- Resumen financiero -->
+                        @if (subtotalCarrito > 0)
                         {
                             <div class="summary-box summary-success mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="text-muted"><i class="bi bi-tag-fill me-1"></i>Precio original</span>
-                                    <s class="text-muted">$@precioSeleccionado.ToString("N2")</s>
-                                </div>
+
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="fw-semibold">Descuento (42%)</span>
-                                    <span class="text-danger">-$@((precioSeleccionado * 0.42m).ToString("N2"))</span>
+                                    <span class="text-muted small">
+                                        <i class="bi bi-bag-check me-1"></i>
+                                        Subtotal Carrito
+                                    </span>
+
+                                    <span class="fw-semibold">
+                                        $@subtotalCarrito.ToString("N2")
+                                    </span>
                                 </div>
+
+                                @if (solicitudModel.FormaPago == "E")
+                                {
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+
+                                        <span class="fw-semibold text-success small">
+                                            Descuento Efectivo (42%)
+                                        </span>
+
+                                        <span class="text-danger">
+                                            -$@montoDescuento.ToString("N2")
+                                        </span>
+
+                                    </div>
+                                }
+
                                 <hr class="my-2" />
+
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold fs-6">Total a Pagar</span>
-                                    <span class="fw-bold fs-4 text-success">$@((precioSeleccionado * 0.58m).ToString("N2"))</span>
+
+                                    <span class="fw-bold fs-6">
+                                        Total a Pagar
+                                    </span>
+
+                                    <span class="fw-bold fs-4 text-success">
+                                        $@totalPagarFinal.ToString("N2")
+                                    </span>
+
                                 </div>
                             </div>
                         }
-                        else if (solicitudModel.FormaPago == "C")
+
+                        <!-- Paso 4: Cuotas -->
+                        @if (solicitudModel.FormaPago == "C")
                         {
                             <div class="form-step mb-3">
+
                                 <div class="step-indicator">
                                     <span class="step-badge">4</span>
                                     <span class="step-label">Plazo en Meses</span>
                                 </div>
-                                <InputSelect class="form-select form-select-lg" @bind-Value="solicitudModel.NumeroCuotas">
+
+                                <InputSelect class="form-select form-select-lg"
+                                             @bind-Value="solicitudModel.NumeroCuotas">
+
                                     @for (int i = 3; i <= 18; i++)
                                     {
                                         <option value="@i">@i Meses</option>
                                     }
+
                                 </InputSelect>
-                                <ValidationMessage For="@(() => solicitudModel.NumeroCuotas)" class="text-danger small d-block mt-1" />
+
+                                <ValidationMessage
+                                    For="@(() => solicitudModel.NumeroCuotas)"
+                                    class="text-danger small d-block mt-1" />
+
                             </div>
                         }
 
-                        <button type="submit" class="btn btn-primary btn-lg w-100 py-3 mt-2 btn-submit" disabled="@procesando">
+                        <!-- Procesar venta -->
+                        <button type="submit"
+                                class="btn btn-primary btn-lg w-100 py-3 mt-2 btn-submit"
+                                disabled="@(procesando || !carrito.Any())">
+
                             @if (procesando)
                             {
-                                <span class="spinner-border spinner-border-sm me-2"></span><span>Procesando transacción...</span>
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                <span>Procesando transacción...</span>
                             }
                             else
                             {
-                                <span><i class="bi bi-receipt-cutoff me-2"></i>Procesar Facturación</span>
+                                <span>
+                                    <i class="bi bi-receipt-cutoff me-2"></i>
+                                    Procesar Facturación
+                                </span>
                             }
+
                         </button>
+
                     </EditForm>
+
                 </div>
             </div>
         </div>
 
-        <!-- Columna de Resultado -->
-        <div class="col-lg-6">
+        <!-- Columna de resultado -->
+        <div class="col-lg-5">
+
             @if (respuestaUltimaVenta != null && respuestaUltimaVenta.Exitosa)
             {
                 <div class="card border-0 shadow-sm card-success h-100">
+
                     <div class="card-header card-header-success">
                         <div class="d-flex align-items-center">
                             <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-                            <h5 class="mb-0 fw-semibold fs-6 fs-md-5">Factura Generada</h5>
+                            <h5 class="mb-0 fw-semibold fs-6 fs-md-5">
+                                Factura Generada
+                            </h5>
                         </div>
                     </div>
+
                     <div class="card-body p-3 p-md-4">
+
                         <div class="result-row">
-                            <span class="result-label"><i class="bi bi-hash me-1"></i>N° Factura</span>
-                            <span class="badge bg-dark fs-6 px-3 py-2">@respuestaUltimaVenta.FacturaId</span>
+                            <span class="result-label">
+                                <i class="bi bi-hash me-1"></i>
+                                N° Factura
+                            </span>
+
+                            <span class="badge bg-dark fs-6 px-3 py-2">
+                                @respuestaUltimaVenta.FacturaId
+                            </span>
                         </div>
+
                         <div class="result-row">
-                            <span class="result-label"><i class="bi bi-currency-dollar me-1"></i>Monto Procesado</span>
-                            <span class="fs-4 fw-bold text-success">$@respuestaUltimaVenta.TotalPagar.ToString("N2")</span>
+                            <span class="result-label">
+                                <i class="bi bi-currency-dollar me-1"></i>
+                                Monto Procesado
+                            </span>
+
+                            <span class="fs-4 fw-bold text-success">
+                                $@respuestaUltimaVenta.TotalPagar.ToString("N2")
+                            </span>
                         </div>
+
                         @if (respuestaUltimaVenta.CreditoId.HasValue)
                         {
                             <div class="result-row">
-                                <span class="result-label"><i class="bi bi-bank me-1"></i>Código Crédito</span>
-                                <span class="badge bg-primary fs-6 px-3 py-2">#@respuestaUltimaVenta.CreditoId.Value</span>
+
+                                <span class="result-label">
+                                    <i class="bi bi-bank me-1"></i>
+                                    Código Crédito
+                                </span>
+
+                                <span class="badge bg-primary fs-6 px-3 py-2">
+                                    #@respuestaUltimaVenta.CreditoId.Value
+                                </span>
+
                             </div>
                         }
+
                     </div>
                 </div>
             }
             else
             {
                 <div class="card border-0 shadow-sm h-100 placeholder-card">
+
                     <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-4 p-md-5">
+
                         <i class="bi bi-receipt display-1 text-muted opacity-50 mb-3 fs-2 fs-md-1"></i>
-                        <h5 class="text-muted fs-6 fs-md-5">Sin factura generada</h5>
-                        <p class="text-muted small mb-0">Completa el formulario para generar una nueva factura.</p>
+
+                        <h5 class="text-muted fs-6 fs-md-5">
+                            Sin factura generada
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Agrega productos al carrito y procesa la transacción para obtener la factura.
+                        </p>
+
                     </div>
                 </div>
             }
+
         </div>
     </div>
 
-    @if (respuestaUltimaVenta != null && respuestaUltimaVenta.TablaAmortizacion != null && respuestaUltimaVenta.TablaAmortizacion.Any())
+    <!-- Tabla de amortización -->
+    @if (respuestaUltimaVenta != null &&
+         respuestaUltimaVenta.TablaAmortizacion != null &&
+         respuestaUltimaVenta.TablaAmortizacion.Any())
     {
         <div class="mt-4">
-            <TablaAmortizacionComponent Tabla="@respuestaUltimaVenta.TablaAmortizacion" CodigoCredito="@(respuestaUltimaVenta.CreditoId ?? 0)" />
+            <TablaAmortizacionComponent
+                Tabla="@respuestaUltimaVenta.TablaAmortizacion"
+                CodigoCredito="@(respuestaUltimaVenta.CreditoId ?? 0)" />
         </div>
     }
+
 </div>
 
 @code {
+
+    // Variables principales
     private List<Producto> catalogo = new List<Producto>();
-    private SolicitudVentaViewModel solicitudModel = new SolicitudVentaViewModel();
+
+    private List<DetalleVentaItemViewModel> carrito =
+        new List<DetalleVentaItemViewModel>();
+
+    private SolicitudVentaViewModel solicitudModel =
+        new SolicitudVentaViewModel { FormaPago = "E", NumeroCuotas = 3 };
+
     private RespuestaVenta respuestaUltimaVenta;
-    private decimal precioSeleccionado = 0m;
+
+    private int productoSeleccionadoId = -1;
+    private int cantidadAgregar = 1;
     private bool procesando = false;
 
     private string mensajeAlerta = string.Empty;
     private bool esErrorAlerta = false;
 
+    // Propiedades calculadas
+    private decimal subtotalCarrito =>
+        carrito.Sum(i => i.Subtotal);
+
+    private decimal montoDescuento =>
+        solicitudModel.FormaPago == "E"
+            ? subtotalCarrito * 0.42m
+            : 0m;
+
+    private decimal totalPagarFinal =>
+        subtotalCarrito - montoDescuento;
+
+
+    // Cargar catálogo
     protected override async Task OnInitializedAsync()
     {
         try
@@ -231,34 +514,113 @@
         }
     }
 
-    private void OnProductoCambiado()
+
+    // Agregar producto al carrito
+    private void AgregarAlCarrito()
     {
-        var prod = catalogo.FirstOrDefault(p => p.ProId == solicitudModel.ProductoId);
-        precioSeleccionado = prod != null ? prod.ProPrecio : 0m;
+        if (productoSeleccionadoId < 0)
+        {
+            MostrarError("Por favor selecciona un teléfono del catálogo.");
+            return;
+        }
+
+        if (cantidadAgregar <= 0)
+        {
+            MostrarError("La cantidad debe ser mayor a cero.");
+            return;
+        }
+
+        var prod = catalogo.FirstOrDefault(p => p.ProId == productoSeleccionadoId);
+        if (prod == null)
+        {
+            MostrarError("El producto seleccionado no fue encontrado.");
+            return;
+        }
+
+        var existente = carrito.FirstOrDefault(c => c.ProductoId == prod.ProId);
+        if (existente != null)
+        {
+            existente.Cantidad += cantidadAgregar;
+        }
+        else
+        {
+            carrito.Add(new DetalleVentaItemViewModel
+            {
+                ProductoId = prod.ProId,
+                ProductoNombre = prod.ProNombre,
+                PrecioUnitario = prod.ProPrecio,
+                Cantidad = cantidadAgregar
+            });
+        }
+
+        productoSeleccionadoId = -1;
+        cantidadAgregar = 1;
+        LimpiarAlerta();
+    }
+
+
+    private void ModificarCantidad(DetalleVentaItemViewModel item, string val)
+    {
+        if (int.TryParse(val, out int nuevaCant) && nuevaCant > 0)
+        {
+            item.Cantidad = nuevaCant;
+        }
+    }
+
+
+    private void EliminarItemCarrito(DetalleVentaItemViewModel item)
+    {
+        carrito.Remove(item);
     }
 
     private async Task EjecutarVenta()
     {
+        if (!carrito.Any())
+        {
+            MostrarError("Debes agregar al menos un producto al carrito.");
+            return;
+        }
+
         procesando = true;
         LimpiarAlerta();
         respuestaUltimaVenta = null;
 
         try
         {
-            var req = new SolicitudVentaRequest
+            // 1. Mapeo: Convertimos la lista de la UI (DetalleVentaItemViewModel)
+            //    a la lista del proxy WCF (DetalleVentaItemContract)
+            var itemsContrato = carrito.Select(c => new ComercializadoraServiceReference.DetalleVentaItemContract
+            {
+                ProductoId = c.ProductoId,
+                Cantidad = c.Cantidad
+            }).ToList();
+
+            // 2. Construcción del Request SOAP
+            var req = new ComercializadoraServiceReference.SolicitudVentaRequest
             {
                 CedulaCliente = solicitudModel.CedulaCliente,
-                ProductoId = solicitudModel.ProductoId,
                 FormaPago = solicitudModel.FormaPago,
-                NumeroCuotas = solicitudModel.NumeroCuotas
+                NumeroCuotas = solicitudModel.NumeroCuotas,
+                Items = itemsContrato
             };
 
+            // 3. Envío al Servidor WCF
             respuestaUltimaVenta = await VentaService.ProcesarVentaAsync(req);
 
-            if (respuestaUltimaVenta.Exitosa)
+            if (respuestaUltimaVenta != null && respuestaUltimaVenta.Exitosa)
+            {
                 MostrarExito(respuestaUltimaVenta.Mensaje);
+
+                // Limpieza tras la venta
+                carrito.Clear();
+                solicitudModel = new SolicitudVentaViewModel { FormaPago = "E", NumeroCuotas = 3 };
+                productoSeleccionadoId = -1;
+                cantidadAgregar = 1;
+            }
             else
-                MostrarError(respuestaUltimaVenta.Mensaje);
+            {
+                MostrarError(respuestaUltimaVenta?.Mensaje ?? "No se recibió respuesta del servidor.");
+            }
         }
         catch (Exception ex)
         {
@@ -270,7 +632,30 @@
         }
     }
 
-    private void MostrarExito(string m) { mensajeAlerta = m; esErrorAlerta = false; }
-    private void MostrarError(string m) { mensajeAlerta = m; esErrorAlerta = true; }
-    private void LimpiarAlerta() { mensajeAlerta = string.Empty; }
+
+
+    // Capturar errores de formulario cuando no pase la validación
+    private void ManejarSubmitInvalido()
+    {
+        MostrarError("Verifica los datos ingresados: la cédula es obligatoria y debe ser válida.");
+    }
+
+
+    // Mostrar mensajes
+    private void MostrarExito(string m)
+    {
+        mensajeAlerta = m;
+        esErrorAlerta = false;
+    }
+
+    private void MostrarError(string m)
+    {
+        mensajeAlerta = m;
+        esErrorAlerta = true;
+    }
+
+    private void LimpiarAlerta()
+    {
+        mensajeAlerta = string.Empty;
+    }
 }

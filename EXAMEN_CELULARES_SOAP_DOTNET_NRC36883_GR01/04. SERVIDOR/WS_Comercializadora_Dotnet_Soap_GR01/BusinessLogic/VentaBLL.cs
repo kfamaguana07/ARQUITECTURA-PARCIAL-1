@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using WS_Comercializadora_Dotnet_Soap_GR01.BanquitoServiceReference;
 using WS_Comercializadora_Dotnet_Soap_GR01.DataAccess;
 using WS_Comercializadora_Dotnet_Soap_GR01.Models;
@@ -14,7 +15,7 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.BusinessLogic
 
         public RespuestaVenta ProcesarVenta(SolicitudVentaRequest solicitud)
         {
-            // 1. Validar existencia del cliente en la Comercializadora
+            // 1. Validar existencia del cliente
             var cliente = _clienteDAL.ObtenerPorCedula(solicitud.CedulaCliente);
             if (cliente == null)
             {
@@ -25,25 +26,60 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.BusinessLogic
                 };
             }
 
-            // 2. Validar existencia del producto
-            var producto = _productoDAL.ObtenerPorId(solicitud.ProductoId);
-            if (producto == null)
+            // 2. Validar y construir la lista de detalles consultando precios reales en la BD
+            if (solicitud.Items == null || !solicitud.Items.Any())
             {
                 return new RespuestaVenta
                 {
                     Exitosa = false,
-                    Mensaje = "El producto seleccionado no existe en el catálogo."
+                    Mensaje = "El carrito de compras no contiene productos."
+                };
+            }
+
+            var detallesFactura = new List<FacturaDetalleItem>();
+            decimal subtotalGeneral = 0m;
+
+            foreach (var item in solicitud.Items)
+            {
+                if (item.Cantidad <= 0) continue;
+
+                var prodBD = _productoDAL.ObtenerPorId(item.ProductoId);
+                if (prodBD == null)
+                {
+                    return new RespuestaVenta
+                    {
+                        Exitosa = false,
+                        Mensaje = $"El producto con ID #{item.ProductoId} no existe en el catálogo."
+                    };
+                }
+
+                detallesFactura.Add(new FacturaDetalleItem
+                {
+                    ProductoId = prodBD.ProId,
+                    Cantidad = item.Cantidad,
+                    PrecioUnitario = prodBD.ProPrecio
+                });
+
+                subtotalGeneral += (prodBD.ProPrecio * item.Cantidad);
+            }
+
+            if (!detallesFactura.Any())
+            {
+                return new RespuestaVenta
+                {
+                    Exitosa = false,
+                    Mensaje = "No hay ítems con cantidades válidas para procesar."
                 };
             }
 
             // 3. Evaluar modalidad de pago
             if (solicitud.FormaPago.Equals("E", StringComparison.OrdinalIgnoreCase))
             {
-                return ProcesarVentaEfectivo(cliente, producto);
+                return ProcesarVentaEfectivo(cliente, subtotalGeneral, detallesFactura);
             }
             else if (solicitud.FormaPago.Equals("C", StringComparison.OrdinalIgnoreCase))
             {
-                return ProcesarVentaCredito(cliente, producto, solicitud);
+                return ProcesarVentaCredito(cliente, subtotalGeneral, detallesFactura, solicitud);
             }
             else
             {
@@ -55,35 +91,39 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.BusinessLogic
             }
         }
 
-        private RespuestaVenta ProcesarVentaEfectivo(ClienteComercializadora cliente, Producto producto)
+        private RespuestaVenta ProcesarVentaEfectivo(ClienteComercializadora cliente, decimal subtotal, List<FacturaDetalleItem> detalles)
         {
             // Descuento del 42% en compras en efectivo
-            decimal precioConDescuento = Math.Round(producto.ProPrecio * 0.58m, 2);
+            decimal descuento = Math.Round(subtotal * 0.42m, 2);
+            decimal totalPagar = subtotal - descuento;
 
             Factura factura = new Factura
             {
                 CliId = cliente.CliId,
                 FacFecha = DateTime.Now,
                 FacFormaPago = "E",
-                FacPrecioTotal = precioConDescuento,
+                FacSubtotal = subtotal,
+                FacDescuento = descuento,
+                FacPrecioTotal = totalPagar,
                 FacNumCuotas = null,
-                FacPrecioCuota = null
+                FacPrecioCuota = null,
+                CreId = null
             };
 
-            int facturaId = _facturaDAL.GuardarFactura(factura, producto.ProId);
+            int facturaId = _facturaDAL.GuardarFactura(factura, detalles);
 
             return new RespuestaVenta
             {
                 Exitosa = true,
-                Mensaje = "Venta en efectivo completada con éxito. Se aplicó un 42% de descuento.",
+                Mensaje = "Venta multiproducto en efectivo completada con éxito (-42% descuento).",
                 FacturaId = facturaId,
-                TotalPagar = precioConDescuento,
+                TotalPagar = totalPagar,
                 CreditoId = null,
                 TablaAmortizacion = null
             };
         }
 
-        private RespuestaVenta ProcesarVentaCredito(ClienteComercializadora cliente, Producto producto, SolicitudVentaRequest solicitud)
+        private RespuestaVenta ProcesarVentaCredito(ClienteComercializadora cliente, decimal totalMonto, List<FacturaDetalleItem> detalles, SolicitudVentaRequest solicitud)
         {
             if (solicitud.NumeroCuotas < 3 || solicitud.NumeroCuotas > 18)
             {
@@ -94,12 +134,11 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.BusinessLogic
                 };
             }
 
-            // Consumo WCF Servidor a Servidor (Comercializadora -> Banco)
             using (BanquitoServiceClient bancoClient = new BanquitoServiceClient())
             {
                 try
                 {
-                    // Paso 1: Validar reglas de sujeto de crédito en BanQuito
+                    // 1. Validar reglas de crédito en BanQuito
                     var validacion = bancoClient.ValidarSujetoCredito(solicitud.CedulaCliente);
                     if (!validacion.EsSujeto)
                     {
@@ -110,19 +149,19 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.BusinessLogic
                         };
                     }
 
-                    // Paso 2: Verificar cupo máximo autorizado
+                    // 2. Verificar cupo máximo autorizado contra el monto total del carrito
                     decimal montoMaximo = bancoClient.ObtenerMontoMaximo(validacion.CodigoCliente);
-                    if (producto.ProPrecio > montoMaximo)
+                    if (totalMonto > montoMaximo)
                     {
                         return new RespuestaVenta
                         {
                             Exitosa = false,
-                            Mensaje = $"El valor del teléfono (${producto.ProPrecio}) excede el cupo máximo otorgado por el banco (${montoMaximo})."
+                            Mensaje = $"El monto total del carrito (${totalMonto:N2}) excede el cupo máximo otorgado por el banco (${montoMaximo:N2})."
                         };
                     }
 
-                    // Paso 3: Otorgar crédito en el banco
-                    int codCredito = bancoClient.OtorgarCredito(validacion.CodigoCliente, producto.ProPrecio, solicitud.NumeroCuotas);
+                    // 3. Otorgar crédito en el banco
+                    int codCredito = bancoClient.OtorgarCredito(validacion.CodigoCliente, totalMonto, solicitud.NumeroCuotas);
                     if (codCredito <= 0)
                     {
                         return new RespuestaVenta
@@ -132,29 +171,32 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.BusinessLogic
                         };
                     }
 
-                    // Paso 4: Obtener tabla de amortización generada
+                    // 4. Obtener tabla de amortización
                     var tablaAmortizacion = bancoClient.ConsultarTablaAmortizacion(codCredito);
-                    decimal valorCuota = tablaAmortizacion.Length > 0 ? tablaAmortizacion[0].ValorCuota : 0;
+                    decimal valorCuota = (tablaAmortizacion != null && tablaAmortizacion.Length > 0) ? tablaAmortizacion[0].ValorCuota : 0;
 
-                    // Paso 5: Registrar factura localmente
+                    // 5. Registrar factura localmente
                     Factura factura = new Factura
                     {
                         CliId = cliente.CliId,
                         FacFecha = DateTime.Now,
                         FacFormaPago = "C",
-                        FacPrecioTotal = producto.ProPrecio,
+                        FacSubtotal = totalMonto,
+                        FacDescuento = 0m,
+                        FacPrecioTotal = totalMonto,
                         FacNumCuotas = solicitud.NumeroCuotas,
-                        FacPrecioCuota = valorCuota
+                        FacPrecioCuota = valorCuota,
+                        CreId = codCredito
                     };
 
-                    int facturaId = _facturaDAL.GuardarFactura(factura, producto.ProId);
+                    int facturaId = _facturaDAL.GuardarFactura(factura, detalles);
 
                     return new RespuestaVenta
                     {
                         Exitosa = true,
-                        Mensaje = "Crédito aprobado y venta registrada correctamente.",
+                        Mensaje = "Crédito aprobado y venta multiproducto registrada correctamente.",
                         FacturaId = facturaId,
-                        TotalPagar = producto.ProPrecio,
+                        TotalPagar = totalMonto,
                         CreditoId = codCredito,
                         TablaAmortizacion = new List<CuotaAmortizacion>(tablaAmortizacion)
                     };
@@ -177,6 +219,12 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.BusinessLogic
                 var resultado = bancoClient.ConsultarTablaAmortizacion(codCredito);
                 return resultado != null ? new List<CuotaAmortizacion>(resultado) : new List<CuotaAmortizacion>();
             }
+        }
+
+        public List<FacturaConsultaContract> ObtenerHistorialFacturas(string cedulaCliente)
+        {
+            string cedulaLimpia = string.IsNullOrWhiteSpace(cedulaCliente) ? null : cedulaCliente.Trim();
+            return _facturaDAL.ObtenerHistorialFacturas(cedulaLimpia);
         }
     }
 }

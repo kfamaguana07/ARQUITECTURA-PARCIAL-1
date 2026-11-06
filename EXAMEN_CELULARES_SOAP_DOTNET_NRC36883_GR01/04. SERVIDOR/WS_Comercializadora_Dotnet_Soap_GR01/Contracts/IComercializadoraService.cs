@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ServiceModel;
+using System.Threading.Tasks;
 using WS_Comercializadora_Dotnet_Soap_GR01.BanquitoServiceReference;
 using WS_Comercializadora_Dotnet_Soap_GR01.Models;
 
@@ -28,5 +29,9 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.Contracts
         // 3. Consulta de Amortización desde la Comercializadora
         [OperationContract]
         List<CuotaAmortizacion> ConsultarAmortizacionCredito(int codigoCredito);
+
+        // 4. Consulta de Facturas desde la Comercializadora
+        [OperationContract]
+        List<FacturaConsultaContract> ObtenerHistorialFacturas(string cedulaCliente);
     }
 }

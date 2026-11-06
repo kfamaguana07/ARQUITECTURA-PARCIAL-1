@@ -19,6 +19,12 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.Models
         public string FacFormaPago { get; set; } // 'E' (Efectivo) o 'C' (Crédito)
 
         [DataMember]
+        public decimal FacSubtotal { get; set; }
+
+        [DataMember]
+        public decimal FacDescuento { get; set; }
+
+        [DataMember]
         public decimal FacPrecioTotal { get; set; }
 
         [DataMember]
@@ -26,5 +32,8 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.Models
 
         [DataMember]
         public decimal? FacPrecioCuota { get; set; }
+
+        [DataMember]
+        public int? CreId { get; set; }
     }
 }

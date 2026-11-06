@@ -89,7 +89,9 @@
     <Compile Include="DataAccess\FacturaDAL.cs" />
     <Compile Include="DataAccess\ProductoDAL.cs" />
     <Compile Include="Models\ClienteComercializadora.cs" />
+    <Compile Include="Models\DetalleVentaItemContract.cs" />
     <Compile Include="Models\Factura.cs" />
+    <Compile Include="Models\FacturaConsultaContract.cs" />
     <Compile Include="Models\Producto.cs" />
     <Compile Include="Models\RespuestaVenta.cs" />
     <Compile Include="Models\SolicitudVentaRequest.cs" />

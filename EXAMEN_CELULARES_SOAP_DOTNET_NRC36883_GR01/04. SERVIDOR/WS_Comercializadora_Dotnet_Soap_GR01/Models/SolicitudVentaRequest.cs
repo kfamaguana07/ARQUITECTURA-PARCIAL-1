@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace WS_Comercializadora_Dotnet_Soap_GR01.Models
 {
@@ -9,12 +10,12 @@ namespace WS_Comercializadora_Dotnet_Soap_GR01.Models
         public string CedulaCliente { get; set; }
 
         [DataMember]
-        public int ProductoId { get; set; }
+        public string FormaPago { get; set; } // 'E' (Efectivo) o 'C' (Crédito)
 
         [DataMember]
-        public string FormaPago { get; set; } // "E" = Efectivo, "C" = Crédito Directo
+        public int NumeroCuotas { get; set; }
 
         [DataMember]
-        public int NumeroCuotas { get; set; } // Requerido si FormaPago == "C" (entre 3 y 18)
+        public List<DetalleVentaItemContract> Items { get; set; } = new List<DetalleVentaItemContract>();
     }
 }

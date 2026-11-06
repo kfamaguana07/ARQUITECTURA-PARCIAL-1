@@ -10,7 +10,7 @@ namespace ComercializadoraUI.shared.Extensions
     {
         public static IServiceCollection AddComercializadoraSharedServices(this IServiceCollection services)
         {
-            string ipServidor = "10.96.24.79";
+            string ipServidor = "192.168.100.223";
             string puerto = "9092";
 
             string wcfEndpointUrl = $"http://{ipServidor}:{puerto}/Services/ComercializadoraService.svc";
